@@ -13,9 +13,7 @@ export default defineConfig(
     languageOptions: {
       parser: vueParser,
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true
-        },
+        ecmaFeatures: { jsx: true },
         extraFileExtensions: ['.vue'],
         parser: tseslint.parser
       }
@@ -26,14 +24,7 @@ export default defineConfig(
     rules: {
       'vue/require-default-prop': 'off',
       'vue/multi-word-component-names': 'off',
-      'vue/block-lang': [
-        'error',
-        {
-          script: {
-            lang: 'ts'
-          }
-        }
-      ]
+      'vue/block-lang': ['error', { script: { lang: 'ts' } }]
     }
   },
   eslintConfigPrettier
