@@ -1,0 +1,44 @@
+:root {
+  /* Cores base */
+  --bg: #efe6dd;
+  --surface: #f4ece4;
+  --surface-border: #d9cfc5;
+  --text-title: #4a3520;
+  --text: #7a6650;
+  --text-muted: #a08c76;
+  --shadow: 0 2px 0 rgba(120, 100, 80, 0.25), 0 1px 4px rgba(120, 100, 80, 0.18);
+
+  /* Paleta de grupos (texto/ícone + fundo pastel) */
+  --group-orange: #d2603a;
+  --group-orange-bg: #f0d6be;
+  --group-yellow: #b8860b;
+  --group-yellow-bg: #f0e0bc;
+  --group-green: #1f7a4d;
+  --group-green-bg: #e3e0c8;
+  --group-red: #c0392b;
+  --group-red-bg: #efdad3;
+
+  /* Tipografia */
+  --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 28px;
+
+  /* Forma e espaçamento */
+  --radius-md: 12px;
+  --radius-pill: 999px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --sidebar-width: 300px;
+  --row-height: 44px;
+
+  /* Movimento */
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
