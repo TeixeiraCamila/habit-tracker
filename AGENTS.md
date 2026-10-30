@@ -149,6 +149,15 @@ nas seções 6.2 a 6.4 do planejamento. Resumo:
   junto com `base.css` em `main.ts`) em vez de cores/medidas soltas.
 - Textos de interface em português.
 
+## Comentários
+
+- Arquivos ligados ao Electron (main, preload, configs do electron-vite/builder e entrada do
+  renderer) devem começar com um comentário em português explicando o que são e o que fazem.
+- Mantenha cada comentário com no máximo 3 linhas e prefira explicar o "porquê" em vez de repetir
+  o código.
+- Use o mesmo padrão em funções ou blocos não óbvios; comentários de linha devem ser curtos e
+  objetivos.
+
 ## Fluxo de trabalho
 
 1. Leia a fase correspondente no planejamento antes de implementar.
