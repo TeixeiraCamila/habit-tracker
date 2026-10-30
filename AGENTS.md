@@ -12,8 +12,8 @@ usuária; não há conta, servidor ou nuvem.
 
 Stack prevista pelo planejamento: Vue 3 (Composition API, `<script setup>`), Pinia, Vue Router
 (hash mode), SQLite via better-sqlite3, Zod, date-fns, lucide-vue-next, Vitest e Playwright.
-No estado atual, apenas a base do electron-vite (Vue + TS) está instalada — as dependências das
-próximas fases ainda não foram adicionadas.
+A Fase 0 está concluída com Electron, Vue, TypeScript, Pinia, Vue Router, Vitest e CI; as
+dependências de dados entram nas próximas fases.
 
 ## Comandos
 
@@ -22,7 +22,10 @@ npm install          # instala dependências (roda postinstall do Electron)
 npm run dev          # electron-vite dev (main + preload + renderer com HMR)
 npm run typecheck    # tsc (main/preload/shared) + vue-tsc (renderer/shared)
 npm run lint         # ESLint com cache
+npm test             # Vitest (projetos node e renderer)
+npm run test:watch   # Vitest em modo watch
 npm run format       # Prettier --write
+npm run format:check # Prettier --check
 npm run build        # typecheck + electron-vite build
 npm run start        # electron-vite preview do build
 npm run build:win    # instalador Windows
@@ -30,8 +33,8 @@ npm run build:mac    # instalador macOS
 npm run build:linux  # instalador Linux
 ```
 
-Sempre rode `npm run typecheck` e `npm run lint` antes de considerar uma mudança pronta. O build
-também roda o typecheck.
+Sempre rode `npm run typecheck`, `npm run lint` e `npm test` antes de considerar uma mudança pronta.
+O build também roda o typecheck, e o CI executa `format:check`, `lint`, `typecheck` e `test`.
 
 ## Estrutura
 
@@ -44,7 +47,7 @@ src/
 │  ├─ repositories/      # acesso a dados com SQL preparado
 │  ├─ ipc/               # handlers IPC por domínio
 │  └─ services/          # stats, backup, notifications, tray
-├─ preload/              # contextBridge -> window.api (+ index.d.ts)
+├─ preload/              # contextBridge -> window.api (+ global.d.ts)
 ├─ shared/               # tipos, schemas Zod e nomes de canais IPC
 └─ renderer/
    ├─ index.html
@@ -59,9 +62,9 @@ recursos do empacotamento; `resources/` contém recursos usados em runtime.
 
 ### Estado atual
 
-Muitos arquivos da estrutura existem como placeholders vazios (por exemplo `src/shared/types.ts`,
-`src/main/db/*`, stores e views). Eles marcam a estrutura planejada e devem ser preenchidos conforme
-as fases do documento de planejamento, sem criar uma organização paralela.
+A Fase 0 está concluída: Electron + Vue 3 + TS, Pinia, Vue Router, Vitest e CI. Os demais arquivos
+da estrutura continuam como placeholders e devem ser preenchidos conforme as fases do planejamento,
+sem criar uma organização paralela.
 
 ## Arquitetura e regras
 
@@ -70,7 +73,7 @@ as fases do documento de planejamento, sem criar uma organização paralela.
 - **Renderer nunca acessa Node/SQLite diretamente.** A comunicação acontece apenas via
   `window.api`, exposto pelo preload com `contextBridge`. Não exponha `ipcRenderer` genérico.
 - **Preload mínimo e tipado.** O contrato de `window.api` está na seção 4.3 do planejamento e deve
-  ser declarado em `src/preload/index.d.ts`.
+  ser declarado em `src/preload/global.d.ts`.
 - **Valide payloads IPC com Zod** em `src/shared/schemas.ts`; erros devem ser serializáveis e
   exibidos como toast no renderer.
 - **Sem ORM.** Use SQL preparado nos repositórios e migrações `.sql` numeradas.
