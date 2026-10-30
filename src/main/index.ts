@@ -2,14 +2,21 @@
 // Também concentra banco, IPC e serviços do sistema; o renderer nunca executa este código.
 import { app, BrowserWindow, session } from 'electron'
 import { join } from 'path'
+import { pathToFileURL } from 'url'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 // Só a própria UI do app pode ser carregada na janela.
-function isAppUrl(url: string): boolean {
+function isAppUrl(rawUrl: string): boolean {
   const devUrl = process.env['ELECTRON_RENDERER_URL']
-  if (is.dev && devUrl) return url.startsWith(devUrl)
-  return url.startsWith('file://')
+  if (is.dev && devUrl) {
+    try {
+      return new URL(rawUrl).origin === new URL(devUrl).origin
+    } catch {
+      return false
+    }
+  }
+  return rawUrl.startsWith(pathToFileURL(join(__dirname, '../renderer/')).href)
 }
 
 function createWindow(): void {
@@ -36,8 +43,12 @@ function createWindow(): void {
   // Bloqueia window.open e links com target="_blank".
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
 
-  // Bloqueia navegação para fora do app.
+  // Bloqueia navegação e redirecionamentos para fora do app.
   mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (!isAppUrl(url)) event.preventDefault()
+  })
+
+  mainWindow.webContents.on('will-redirect', (event, url) => {
     if (!isAppUrl(url)) event.preventDefault()
   })
 
