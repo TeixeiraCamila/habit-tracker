@@ -1,5 +1,5 @@
 import { resolve } from 'path'
-import { defineConfig } from 'electron-vite'
+import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
 
 const shared = resolve(__dirname, 'src/shared')
@@ -9,7 +9,13 @@ export default defineConfig({
     resolve: { alias: { '@shared': shared } }
   },
   preload: {
-    resolve: { alias: { '@shared': shared } }
+    plugins: [externalizeDepsPlugin()],
+    resolve: { alias: { '@shared': shared } },
+    build: {
+      rollupOptions: {
+        output: { format: 'cjs', entryFileNames: '[name].js' }
+      }
+    }
   },
   renderer: {
     resolve: {
