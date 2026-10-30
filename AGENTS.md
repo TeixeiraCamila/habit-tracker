@@ -101,6 +101,32 @@ import type { Habit } from '@shared/types'
 Ao adicionar um novo alias, atualize **os três lugares**: `electron.vite.config.ts`,
 `tsconfig.node.json` e `tsconfig.web.json`.
 
+## Por que dois tsconfigs?
+
+O `tsconfig.json` da raiz não compila nada: ele apenas referencia dois projetos. Main e preload
+compartilham o `tsconfig.node.json`; o `tsconfig.web.json` atende o renderer. A divisão real é
+**Node (main/preload) × browser (renderer)**, não main × preload.
+
+- **`tsconfig.node.json`:** estende a variante Node do `@electron-toolkit/tsconfig` e adiciona
+  `types: ["electron-vite/node"]` (tipos de Node, Electron e do ambiente Vite). Inclui `src/main`,
+  `src/preload`, `src/shared`, as configs do Vite/Vitest e o setup dos testes. É checado com `tsc`.
+- **`tsconfig.web.json`:** estende a variante web e declara as libs `ESNext`, `DOM` e
+  `DOM.Iterable`. Inclui `src/renderer/src`, `src/shared` e `src/preload/*.d.ts` (só as
+  declarações de `window.api`). É checado com `vue-tsc`, que entende arquivos `.vue`.
+
+Motivos para separar:
+
+1. **Ambientes diferentes:** main/preload rodam no Node/Electron; o renderer roda no Chromium. A
+   config web adiciona as libs de DOM usadas pelos componentes Vue.
+2. **Ferramentas diferentes:** SFCs `.vue` precisam de `vue-tsc`; `tsc` puro não as interpreta.
+3. **Includes diferentes:** evita checar views `.vue` com a config de Node e evita arrastar código
+   de main para o typecheck do renderer.
+4. **Contrato compartilhado:** `src/shared` entra nos dois projetos, então o mesmo tipo precisa ser
+   válido nos dois contextos.
+
+Os dois usam `composite: true` para funcionar como project references. Por isso `npm run typecheck`
+executa os dois passos: um erro de tipo ou de alias pode aparecer em apenas um dos lados.
+
 ## Modelo de dados
 
 Tabelas: `groups`, `habits`, `completions`, `settings`, `schema_migrations`. O DDL completo, os
@@ -138,8 +164,5 @@ nas seções 6.2 a 6.4 do planejamento. Resumo:
   (`electron-builder install-app-deps`, já no `postinstall`, ou `@electron/rebuild`).
 - `npm run dev` abre uma janela Electron; em ambientes sem display pode falhar, mas o Vite ainda
   reporta erros de build/resolução no terminal.
-- O `tsconfig.node.json` cobre `src/main`, `src/preload`, `src/shared` e a config do electron-vite;
-  o `tsconfig.web.json` cobre o renderer e `src/shared`. Um erro de alias pode aparecer em apenas
-  um dos dois typechecks.
 - O alias `@shared` também é usado pelo preload; mantenha-o nos três blocos de
   `electron.vite.config.ts`.
