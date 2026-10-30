@@ -1,3 +1,4 @@
+// Depuração do VS Code para os processos main e renderer do Electron.
 {
   "version": "0.2.0",
   "configurations": [

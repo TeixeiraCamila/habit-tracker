@@ -1,0 +1,1 @@
+-- Migração inicial do banco: cria as tabelas do app (Fase 2 do planejamento).

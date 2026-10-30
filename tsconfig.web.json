@@ -1,3 +1,4 @@
+// Configuração TypeScript do renderer (Vue/DOM), incluindo shared e os tipos de window.api.
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
   "include": [

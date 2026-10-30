@@ -1,3 +1,5 @@
+# Configuração de auto-update usada pelo electron-updater em desenvolvimento.
+# Em produção, o provedor e a URL reais devem ser definidos no electron-builder.yml.
 provider: generic
 url: https://example.com/auto-updates
 updaterCacheDirName: habit-tracker-updater

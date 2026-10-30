@@ -1,3 +1,5 @@
+# Configuração do electron-builder: gera os instaladores (Windows, macOS, Linux)
+# e define o que entra no pacote da aplicação.
 appId: com.electron.app
 productName: habit-tracker
 directories:

@@ -1,3 +1,4 @@
+// Tipos compartilhados entre os processos; inclui o modelo Habit e enums do domínio.
 export type HabitKind = 'boolean' | 'counter'
 
 export type FreqType = 'daily' | 'weekdays' | 'times_per_week'

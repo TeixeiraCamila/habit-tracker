@@ -1,3 +1,4 @@
+// Configuração TypeScript do lado Node do Electron: main, preload, shared e configs de build.
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
   "include": [

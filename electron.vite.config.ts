@@ -1,3 +1,5 @@
+// Configuração do electron-vite para main, preload e renderer.
+// Define os aliases compartilhados e compila o preload em CommonJS para o sandbox.
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
