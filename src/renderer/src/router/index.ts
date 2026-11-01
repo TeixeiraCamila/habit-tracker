@@ -12,6 +12,16 @@ export const router = createRouter({
       name: 'settings',
       component: () => import('@renderer/views/SettingsView.vue')
     },
+    // Catálogo de componentes: disponível apenas durante o desenvolvimento.
+    ...(import.meta.env.DEV
+      ? [
+          {
+            path: '/test',
+            name: 'test',
+            component: () => import('@renderer/views/TestView.vue')
+          }
+        ]
+      : []),
     { path: '/:pathMatch(.*)*', redirect: '/' }
   ]
 })
