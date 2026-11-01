@@ -24,13 +24,63 @@ progresso. Tudo fica no próprio computador: sem conta, servidor ou nuvem.
 
 ## Como rodar
 
+Pré-requisito: instalar as dependências uma vez.
+
 ```bash
 npm install
+```
+
+O `postinstall` prepara o Electron e as dependências nativas. Depois, inicie o app em
+desenvolvimento:
+
+```bash
 npm run dev
 ```
 
-O `postinstall` prepara o Electron e as dependências nativas. O `dev` abre a janela do app com HMR
-para o renderer.
+O `dev` sobe o Vite e abre a janela do Electron com HMR no renderer. Alterações em `src/renderer`
+recarregam na hora; mudanças em `src/main` e `src/preload` são recompiladas e reiniciam o app.
+
+## Como buildar
+
+O build de produção roda o typecheck antes de compilar main, preload e renderer:
+
+```bash
+npm run build
+```
+
+O resultado fica em `out/`:
+
+```text
+out/
+├─ main/       # processo principal compilado
+├─ preload/    # preload compilado
+└─ renderer/   # HTML, CSS e JS do renderer
+```
+
+Para abrir o build localmente antes de empacotar:
+
+```bash
+npm run start
+```
+
+### Instaladores
+
+O `electron-builder` gera os instaladores em `dist/`:
+
+```bash
+npm run build:win     # Windows (NSIS)
+npm run build:mac     # macOS (DMG)
+npm run build:linux   # Linux (AppImage, snap e deb)
+```
+
+Para gerar apenas a pasta da aplicação, sem instalador:
+
+```bash
+npm run build:unpack
+```
+
+Os instaladores devem ser gerados no sistema de destino ou em CI: não há cross-compile confiável
+para macOS e Windows a partir do Linux.
 
 ## Scripts
 
@@ -47,6 +97,7 @@ para o renderer.
 | `npm run format:check`  | Verifica a formatação sem alterar arquivos  |
 | `npm run build`         | Typecheck + build de produção               |
 | `npm run start`         | Pré-visualiza o build                       |
+| `npm run build:unpack`  | Gera a pasta da aplicação sem instalador    |
 | `npm run build:win`     | Gera o instalador para Windows              |
 | `npm run build:mac`     | Gera o instalador para macOS                |
 | `npm run build:linux`   | Gera o instalador para Linux                |
@@ -58,10 +109,38 @@ pushes para `main` e pull requests.
 
 ```text
 src/
-├─ main/       # processo principal: janela, SQLite, IPC e serviços
-├─ preload/    # ponte segura para window.api (+ global.d.ts)
-├─ shared/     # tipos, schemas Zod e canais IPC compartilhados
-└─ renderer/   # Vue 3: views, stores, composables e estilos
+├─ main/                  # processo principal (Node/Electron)
+│  ├─ index.ts            # janela, segurança e ciclo de vida
+│  ├─ paths.ts            # userData, banco e backups
+│  ├─ db/                 # conexão SQLite e migrações .sql
+│  ├─ repositories/       # acesso a dados com SQL preparado
+│  ├─ ipc/                # handlers IPC por domínio
+│  └─ services/           # estatísticas, backup, notificações e bandeja
+├─ preload/               # ponte segura para window.api
+│  ├─ index.ts            # expõe o contrato via contextBridge
+│  └─ global.d.ts         # tipos de window.api usados no renderer
+├─ shared/                # tipos, schemas Zod e nomes de canais IPC
+└─ renderer/              # interface Vue 3
+   ├─ index.html          # HTML e CSP do renderer
+   └─ src/
+      ├─ main.ts          # monta Vue, Pinia e Vue Router
+      ├─ App.vue          # layout raiz e navegação
+      ├─ router/          # rotas em hash mode
+      ├─ stores/          # estado com Pinia
+      ├─ composables/     # lógica reutilizável
+      ├─ components/      # componentes Vue
+      ├─ views/           # telas (Hoje, Semana, Mês, Estatísticas, Configurações)
+      └─ styles/          # tokens.css e base.css
+```
+
+Fora de `src/`:
+
+```text
+tests/       # testes unitários (Vitest) e e2e (Playwright)
+build/       # ícones e recursos do empacotamento
+resources/   # recursos usados em runtime
+out/         # build do electron-vite (gerado)
+dist/        # instaladores do electron-builder (gerado)
 ```
 
 - `src/main` é o único que acessa o sistema operacional e o banco.
