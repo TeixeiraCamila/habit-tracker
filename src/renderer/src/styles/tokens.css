@@ -41,4 +41,8 @@
   --motion-fast: 120ms;
   --motion-base: 180ms;
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Interação */
+  --focus-ring: var(--group-orange);
+  --selection-bg: var(--group-orange-bg);
 }

@@ -1,4 +1,6 @@
 // Entrada do renderer: carrega os estilos globais e monta o app Vue no elemento #app.
+import '@fontsource/courier-prime/latin-400.css'
+import '@fontsource/courier-prime/latin-700.css'
 import './styles/tokens.css'
 import './styles/base.css'
 

@@ -1,7 +1,12 @@
+/* Reset */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+* {
+  margin: 0;
 }
 
 html,
@@ -11,36 +16,34 @@ body,
 }
 
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
   font-family: var(--font-mono);
   font-size: var(--text-base);
   line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  padding: 2rem;
+  user-select: none; /* app desktop: a UI não é texto para selecionar */
 }
 
 h1,
 h2,
-h3,
-h4,
-h5,
-h6,
-p,
-figure,
-blockquote,
-dl,
-dd {
-  margin: 0;
+h3 {
+  color: var(--text-title);
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 ul,
 ol {
-  margin: 0;
   padding: 0;
   list-style: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
 }
 
 button,
@@ -52,9 +55,9 @@ textarea {
 }
 
 button {
-  padding: 0;
   background: none;
   border: 0;
+  padding: 0;
   cursor: pointer;
 }
 
@@ -62,23 +65,37 @@ a {
   color: inherit;
   text-decoration: none;
 }
-
-img,
-svg {
-  display: block;
-  max-width: 100%;
+/* Texto editável continua selecionável */
+input,
+textarea,
+[contenteditable='true'] {
+  user-select: text;
 }
 
-:focus-visible {
-  outline: 2px solid var(--text-title);
-  outline-offset: 2px;
-}
-
+/* Seleção de texto */
 ::selection {
-  background: var(--group-orange-bg);
+  background: var(--selection-bg);
   color: var(--text-title);
 }
 
+/* Foco visível, só para teclado */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+/* Scrollbar fina na cor do tema */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-border) transparent;
+}
+
+/* Movimento reduzido */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
