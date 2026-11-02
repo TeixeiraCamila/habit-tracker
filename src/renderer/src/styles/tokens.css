@@ -17,6 +17,12 @@
   --group-green-bg: #e3e0c8;
   --group-red: #c0392b;
   --group-red-bg: #efdad3;
+  --group-blue: #3f5f73;
+  --group-blue-bg: #d9e4ea;
+  --group-lilac: #6b4c8a;
+  --group-lilac-bg: #e7ddf1;
+  --group-pink: #9c3f5e;
+  --group-pink-bg: #f1dce3;
 
   /* Tipografia */
   --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
