@@ -170,6 +170,15 @@ nas seções 6.2 a 6.4 do planejamento. Resumo:
 4. Rode `npm run typecheck` e `npm run lint`.
 5. Para mudanças de UI, valide com `npm run dev` (HMR) e confira os estados de foco, vazio e erro.
 
+## Commits
+
+- Commits só devem ser feitos quando forem exigidos (pela pessoa usuária ou pelo fluxo do projeto);
+  não automatizar commits em tarefas rotineiras sem solicitação.
+- Método básico: `git add <arquivos>` seguido de `git commit -m "<tipo>(<escopo>): <resumo>"`.
+- Exemplo: `git add src/main/db/migrate.ts && git commit -m "feat(main): adicionar runner de migrações"`.
+- Tipos comuns: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`; escopo em letras minúsculas
+  (ex.: `main`, `renderer`, `shared`).
+
 ## Armadilhas conhecidas
 
 - `better-sqlite3` é módulo nativo: precisa de rebuild para a versão do Electron
