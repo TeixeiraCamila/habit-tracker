@@ -8,6 +8,8 @@ const shared = resolve(__dirname, 'src/shared')
 
 export default defineConfig({
   main: {
+    // Native modules (better-sqlite3) não podem ser empacotados; mantém o require externo.
+    plugins: [externalizeDepsPlugin()],
     resolve: { alias: { '@shared': shared } }
   },
   preload: {

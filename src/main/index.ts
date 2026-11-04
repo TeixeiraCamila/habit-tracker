@@ -5,6 +5,9 @@ import { join } from 'path'
 import { pathToFileURL } from 'url'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { migrate } from './db/migrate'
+import { closeDb, initDb } from './db/connection'
+import { dbPath } from './paths'
 
 // Só a própria UI do app pode ser carregada na janela.
 function isAppUrl(rawUrl: string): boolean {
@@ -64,27 +67,37 @@ function createWindow(): void {
 }
 
 // Executa a inicialização quando o Electron termina de carregar.
-app.whenReady().then(() => {
-  // Identifica o app no Windows para agrupamento e notificações.
-  electronApp.setAppUserModelId('com.electron')
+app
+  .whenReady()
+  .then(async () => {
+    // Identifica o app no Windows para agrupamento e notificações.
+    electronApp.setAppUserModelId('com.electron')
 
-  // Mantém os atalhos padrão de devtools e recarregamento em desenvolvimento.
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
+    // Mantém os atalhos padrão de devtools e recarregamento em desenvolvimento.
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
+
+    // Nega qualquer permissão pedida pelo renderer (câmera, geolocalização etc.).
+    session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) =>
+      callback(false)
+    )
+
+    // Abre o banco (cria o arquivo se ainda não existir) e aplica o schema.
+    migrate(initDb(dbPath()))
+    createWindow()
+
+    // No macOS, recria a janela quando o ícone do dock é clicado.
+    app.on('activate', function () {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    })
+  })
+  .catch((error: Error) => {
+    // Falha no boot (banco/janela) não deve ficar como unhandled rejection.
+    console.error('Falha na inicialização do app:', error)
   })
 
-  // Nega qualquer permissão pedida pelo renderer (câmera, geolocalização etc.).
-  session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) =>
-    callback(false)
-  )
-
-  createWindow()
-
-  // No macOS, recria a janela quando o ícone do dock é clicado.
-  app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
+app.on('before-quit', () => closeDb()) // Fecha o banco antes de sair do app.
 
 // Fecha o app quando todas as janelas são fechadas, exceto no macOS.
 app.on('window-all-closed', () => {

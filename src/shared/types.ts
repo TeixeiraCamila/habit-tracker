@@ -13,6 +13,8 @@ export interface Group {
   position: number
 }
 
+export type NewGroup = Omit<Group, 'id' | 'position'>
+
 export interface Habit {
   id: number
   groupId: number | null
@@ -29,4 +31,23 @@ export interface Habit {
   startDate: string
   archivedAt?: string
   position: number
+}
+
+export type NewHabit = Omit<Habit, 'id' | 'position' | 'archivedAt'>
+
+export interface Completion {
+  id: number
+  habitId: number
+  date: string
+  value: number
+  note?: string
+}
+
+export interface Settings {
+  daysStartAt: string
+  weekStartOn: 0 | 1
+  notifications: boolean
+  launchAtLogin: boolean
+  minimizeToTray: boolean
+  autoBackup: boolean
 }
