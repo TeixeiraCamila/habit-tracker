@@ -18,6 +18,7 @@ const currentIndex = computed(() => Math.max(0, props.options.indexOf(props.mode
 
 // As setas percorrem as opções em ciclo, inclusive do fim para o começo.
 function step(offset: number): void {
+  console.log('🚀 ~ step ~ offset:', offset)
   const total = props.options.length
   if (total === 0) return
 
@@ -56,6 +57,7 @@ function step(offset: number): void {
   display: inline-flex;
   align-items: stretch;
   min-width: 180px;
+  width: 100%;
   overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--surface-border);

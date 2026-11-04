@@ -1,69 +1,27 @@
 <script setup lang="ts">
-import type { Group, Habit } from '@shared/types'
-import { computed, reactive, ref, watch } from 'vue'
-import GroupRow from './GroupRow.vue'
-import HabitRow from './HabitRow.vue'
-import StarDivider from './StarDivider.vue'
-import TreeGuide from './TreeGuide.vue'
+import { TreeGroup } from '@renderer/types/tree'
+import { ref } from 'vue'
 
 const props = defineProps<{
-  groups: Group[]
-  habits: Habit[]
-  selectedHabitId: number | null
+  groups: TreeGroup[]
+  selectedHabitId?: number | null
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   'select-habit': [habitId: number]
-  'toggle-group': [groupId: number]
-  reorder: [payload: { habitId: number; targetId: number }]
   'context-menu': [payload: { kind: 'group' | 'habit'; id: number; event: MouseEvent }]
 }>()
 
-// Grupos novos entram expandidos; os já conhecidos mantêm o estado escolhido.
-const expanded = reactive(new Set<number>())
-const knownGroups = new Set<number>()
-
-watch(
-  () => props.groups.map((group) => group.id),
-  (ids) => {
-    for (const id of ids) {
-      if (!knownGroups.has(id)) {
-        knownGroups.add(id)
-        expanded.add(id)
-      }
-    }
-  },
-  { immediate: true }
-)
-
-const ungroupedHabits = computed(() => props.habits.filter((habit) => habit.groupId === null))
-
-function habitsOf(groupId: number): Habit[] {
-  return props.habits.filter((habit) => habit.groupId === groupId)
-}
-
+const expanded = ref(new Set<number>(props.groups.map((g) => g.id)))
 function toggleGroup(groupId: number): void {
-  if (expanded.has(groupId)) expanded.delete(groupId)
-  else expanded.add(groupId)
-  emit('toggle-group', groupId)
+  if (expanded.value.has(groupId)) expanded.value.delete(groupId)
+  else expanded.value.add(groupId)
 }
 
-const draggingHabitId = ref<number | null>(null)
-
-// Reordenação simples: arrastar um hábito e soltar sobre outro emite os dois ids.
-function onDragStart(habit: Habit, event: DragEvent): void {
-  draggingHabitId.value = habit.id
-  event.dataTransfer?.setData('text/plain', String(habit.id))
-  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
-}
-
-function onDrop(target: Habit): void {
-  const source = draggingHabitId.value
-  draggingHabitId.value = null
-  if (source !== null && source !== target.id) {
-    emit('reorder', { habitId: source, targetId: target.id })
-  }
-}
+defineExpose({
+  collapseAll: () => expanded.value.clear(),
+  expandAll: () => (expanded.value = new Set(props.groups.map((g) => g.id)))
+})
 </script>
 
 <template>
@@ -75,59 +33,29 @@ function onDrop(target: Habit): void {
         :icon="group.icon"
         :expanded="expanded.has(group.id)"
         @toggle="toggleGroup(group.id)"
-        @context-menu="emit('context-menu', { kind: 'group', id: group.id, event: $event })"
+        @context-menu="$emit('context-menu', { kind: 'group', id: group.id, event: $event })"
       />
 
       <div
-        v-if="expanded.has(group.id) && habitsOf(group.id).length"
+        :class="{ open: expanded.has(group.id) }"
         class="sidebar-tree__children"
+        :inert="!expanded.has(group.id)"
       >
-        <TreeGuide :color="`var(--group-${group.color})`">
-          <div
-            v-for="habit in habitsOf(group.id)"
-            :key="habit.id"
-            draggable="true"
-            @dragstart="onDragStart(habit, $event)"
-            @dragover.prevent
-            @drop="onDrop(habit)"
-          >
+        <div class="collapse-inner">
+          <TreeGuide :color="group.color">
             <HabitRow
+              v-for="habit in group.habits"
+              :key="habit.id"
               :name="habit.name"
               :icon="habit.icon"
               :selected="habit.id === selectedHabitId"
-              @select="emit('select-habit', habit.id)"
-              @context-menu="emit('context-menu', { kind: 'habit', id: habit.id, event: $event })"
+              @select="$emit('select-habit', habit.id)"
+              @context-menu="$emit('context-menu', { kind: 'habit', id: habit.id, event: $event })"
             />
-          </div>
-        </TreeGuide>
+          </TreeGuide>
+        </div>
       </div>
     </div>
-
-    <div v-if="ungroupedHabits.length" class="sidebar-tree__group">
-      <p class="sidebar-tree__label">Sem grupo</p>
-      <TreeGuide color="var(--surface-border)">
-        <div
-          v-for="habit in ungroupedHabits"
-          :key="habit.id"
-          draggable="true"
-          @dragstart="onDragStart(habit, $event)"
-          @dragover.prevent
-          @drop="onDrop(habit)"
-        >
-          <HabitRow
-            :name="habit.name"
-            :icon="habit.icon"
-            :selected="habit.id === selectedHabitId"
-            @select="emit('select-habit', habit.id)"
-            @context-menu="emit('context-menu', { kind: 'habit', id: habit.id, event: $event })"
-          />
-        </div>
-      </TreeGuide>
-    </div>
-
-    <p v-if="!groups.length && !ungroupedHabits.length" class="sidebar-tree__empty">
-      Nenhum grupo ou hábito ainda.
-    </p>
 
     <StarDivider />
   </nav>
@@ -165,5 +93,21 @@ function onDrop(target: Habit): void {
   font-size: var(--text-sm);
   color: var(--text-muted);
   text-align: center;
+}
+
+/* animação de altura sem medir o conteúdo */
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--motion-base) var(--ease-out);
+}
+
+.collapse.open {
+  grid-template-rows: 1fr;
+}
+
+.collapse-inner {
+  min-height: 0;
+  overflow: hidden;
 }
 </style>

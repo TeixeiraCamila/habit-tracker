@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import AppIcon from './AppIcon.vue'
 import IconButton from './IconButton.vue'
 
 const props = defineProps<{
@@ -9,13 +8,15 @@ const props = defineProps<{
   groupCount: number
 }>()
 
-const emit = defineEmits<{ 'open-settings': [] }>()
+const emit = defineEmits<{ 'open-settings': []; 'open-dev': [] }>()
 
 const subtitle = computed(() => {
   const habits = `${props.habitCount} ${props.habitCount === 1 ? 'hábito' : 'hábitos'}`
   const groups = `${props.groupCount} ${props.groupCount === 1 ? 'grupo' : 'grupos'}`
   return `${habits}, ${groups}`
 })
+
+const IS_DEV = import.meta.env.DEV
 </script>
 
 <template>
@@ -23,12 +24,12 @@ const subtitle = computed(() => {
     <div class="app-header__heading">
       <h1 class="app-header__title">
         {{ title }}
-        <AppIcon name="chevron-down" :size="18" class="app-header__chevron" />
       </h1>
       <p class="app-header__subtitle">{{ subtitle }}</p>
     </div>
 
     <IconButton icon="settings" label="Configurações" @click="emit('open-settings')" />
+    <IconButton v-if="IS_DEV" icon="settings" label="DEV" @click="emit('open-dev')" />
   </header>
 </template>
 
@@ -53,10 +54,6 @@ const subtitle = computed(() => {
   font-weight: 700;
   line-height: 1.2;
   color: var(--text-title);
-}
-
-.app-header__chevron {
-  color: var(--text-muted);
 }
 
 .app-header__subtitle {

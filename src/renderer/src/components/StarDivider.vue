@@ -1,14 +1,14 @@
+<script setup lang="ts"></script>
+
 <template>
-  <div class="star-divider" aria-hidden="true">*.☆.☽.☆.☽.☆.*</div>
+  <p class="star-divider" aria-hidden="true">*.☆.☽.☆.☽.☆.*</p>
 </template>
 
 <style scoped>
 .star-divider {
-  padding: var(--space-4) 0;
-  font-size: var(--text-xs);
+  padding: var(--space-4);
   color: var(--text-muted);
-  text-align: center;
-  letter-spacing: 0.12em;
-  user-select: none;
+  font-family: ui-monospace, monospace;
+  font-size: var(--text-sm);
 }
 </style>

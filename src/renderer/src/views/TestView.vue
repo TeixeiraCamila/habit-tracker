@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Group, GroupColor, Habit } from '@shared/types'
+import type { GroupColor, Habit } from '@shared/types'
+import type { TreeGroup } from '@renderer/types/tree'
 import {
   ActionBar,
   AppHeader,
@@ -20,10 +21,25 @@ import {
 } from '@renderer/components'
 import { ref } from 'vue'
 
-const groups: Group[] = [
-  { id: 1, name: 'Saúde', color: 'orange', icon: 'sun', position: 0 },
-  { id: 2, name: 'Estudos', color: 'yellow', icon: 'book-open', position: 1 },
-  { id: 3, name: 'Bem-estar', color: 'green', icon: 'heart', position: 2 }
+const groups: TreeGroup[] = [
+  {
+    id: 1,
+    name: 'Saúde',
+    color: 'orange',
+    icon: 'sun',
+    habits: [
+      { id: 1, name: 'Beber água', icon: 'droplets' },
+      { id: 2, name: 'Alongar', icon: 'dumbbell' }
+    ]
+  },
+  {
+    id: 2,
+    name: 'Estudos',
+    color: 'yellow',
+    icon: 'book-open',
+    habits: [{ id: 3, name: 'Ler 20 páginas', icon: 'book-open' }]
+  },
+  { id: 3, name: 'Bem-estar', color: 'green', icon: 'heart', habits: [] }
 ]
 
 function makeHabit(id: number, groupId: number | null, name: string, icon: string): Habit {
@@ -44,7 +60,8 @@ const habits = ref<Habit[]>([
   makeHabit(1, 1, 'Beber água', 'droplets'),
   makeHabit(2, 1, 'Alongar', 'dumbbell'),
   makeHabit(3, 2, 'Ler 20 páginas', 'book-open'),
-  makeHabit(4, null, 'Meditar', 'leaf')
+  makeHabit(4, null, 'Meditar', 'leaf'),
+  makeHabit(5, 6, 'Codar', 'moon')
 ])
 
 const view = ref('Hoje')
@@ -100,8 +117,8 @@ function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): vo
       <div class="ds-card ds-card--flush">
         <AppHeader
           title="habits"
-          :habit-count="habits.length"
-          :group-count="groups.length"
+          :habit-count="12"
+          :group-count="4"
           @open-settings="showToast('Configurações abertas')"
         />
       </div>
@@ -142,7 +159,7 @@ function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): vo
         <GroupRow
           name="Saúde"
           color="orange"
-          icon="sun"
+          icon="Sun"
           :expanded="groupExpanded"
           @toggle="groupExpanded = !groupExpanded"
           @context-menu="handleContextMenu({ kind: 'group', id: 1 })"
@@ -150,7 +167,7 @@ function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): vo
         <GroupRow
           name="Estudos"
           color="yellow"
-          icon="book-open"
+          icon="BookOpen"
           :expanded="false"
           @toggle="() => {}"
           @context-menu="handleContextMenu({ kind: 'group', id: 2 })"
@@ -158,7 +175,7 @@ function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): vo
         <GroupRow
           name="Bem-estar"
           color="green"
-          icon="heart"
+          icon="Heart"
           :expanded="true"
           @toggle="() => {}"
           @context-menu="handleContextMenu({ kind: 'group', id: 3 })"
@@ -172,7 +189,7 @@ function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): vo
       <div class="ds-stack">
         <HabitRow
           name="Beber água"
-          icon="droplets"
+          icon="Droplets"
           :selected="habitSelected"
           @select="habitSelected = !habitSelected"
           @context-menu="handleContextMenu({ kind: 'habit', id: 1 })"
@@ -183,7 +200,7 @@ function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): vo
         </HabitRow>
         <HabitRow
           name="Ler 20 páginas"
-          icon="book-open"
+          icon="BookOpen"
           :selected="false"
           @select="() => {}"
           @context-menu="handleContextMenu({ kind: 'habit', id: 3 })"
@@ -195,9 +212,9 @@ function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): vo
       <h2>TreeGuide</h2>
       <p class="ds-note">Linha-guia vertical de 1 px na cor do grupo.</p>
       <div class="ds-stack">
-        <TreeGuide color="var(--group-green)">
-          <HabitRow name="Meditar" icon="leaf" :selected="false" @select="() => {}" />
-          <HabitRow name="Alongar" icon="dumbbell" :selected="false" @select="() => {}" />
+        <TreeGuide color="orange">
+          <HabitRow name="Meditar" icon="Leaf" :selected="false" @select="() => {}" />
+          <HabitRow name="Alongar" icon="Dumbbell" :selected="false" @select="() => {}" />
         </TreeGuide>
       </div>
     </section>

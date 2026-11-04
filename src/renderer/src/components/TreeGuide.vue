@@ -1,5 +1,7 @@
 <script setup lang="ts">
-defineProps<{ color: string }>()
+import { GroupColor } from '@shared/types'
+
+defineProps<{ color: GroupColor }>()
 </script>
 
 <template>
