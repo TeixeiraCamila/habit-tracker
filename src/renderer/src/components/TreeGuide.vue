@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { GroupColor } from '@shared/types'
+import { computed } from 'vue'
+import type { GroupColor } from '@shared/types'
 
-defineProps<{ color: GroupColor }>()
+const props = defineProps<{ color: GroupColor }>()
+
+const style = computed(() => ({ '--guide-color': `var(--group-${props.color})` }))
 </script>
 
 <template>
-  <div class="tree-guide" :style="{ '--guide-color': color }">
+  <div class="tree-guide" :style="style">
     <span class="tree-guide__line" aria-hidden="true" />
     <div class="tree-guide__content"><slot /></div>
   </div>

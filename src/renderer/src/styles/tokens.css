@@ -4,18 +4,19 @@
   --surface: #f4ece4;
   --surface-border: #d9cfc5;
   --text-title: #4a3520;
-  --text: #7a6650;
-  --text-muted: #a08c76;
+  --text: #6f5e4d;
+  --text-muted: #6b5a47;
   --shadow: 0 2px 0 rgba(120, 100, 80, 0.25), 0 1px 4px rgba(120, 100, 80, 0.18);
 
   /* Paleta de grupos (texto/ícone + fundo pastel) */
-  --group-orange: #d2603a;
+  /* Tons ajustados para atingir contraste AA (>= 4.5:1) sobre o fundo pastel. */
+  --group-orange: #9c3f1d;
   --group-orange-bg: #f0d6be;
-  --group-yellow: #b8860b;
+  --group-yellow: #7d5f07;
   --group-yellow-bg: #f0e0bc;
-  --group-green: #1f7a4d;
+  --group-green: #17613a;
   --group-green-bg: #e3e0c8;
-  --group-red: #c0392b;
+  --group-red: #b03224;
   --group-red-bg: #efdad3;
   --group-blue: #3f5f73;
   --group-blue-bg: #d9e4ea;
