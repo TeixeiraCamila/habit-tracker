@@ -6,3 +6,9 @@ export function toDateKey(date: Date): string {
 
   return `${year}-${month}-${day}`
 }
+
+export function addDays(date: Date, days: number): Date {
+  const result = new Date(date)
+  result.setDate(result.getDate() + days)
+  return result
+}

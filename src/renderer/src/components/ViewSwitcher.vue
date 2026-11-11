@@ -5,31 +5,39 @@ import AppIcon from './AppIcon.vue'
 const props = withDefaults(
   defineProps<{
     modelValue: string
-    options?: string[]
+    options?: { value: string; label: string }[]
   }>(),
   {
-    options: () => ['Hoje', 'Semana', 'Mês', 'Estatísticas']
+    options: () => [
+      { value: 'today', label: 'Hoje' },
+      { value: 'week', label: 'Semana' },
+      { value: 'month', label: 'Mês' },
+      { value: 'stats', label: 'Estatísticas' }
+    ]
   }
 )
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
-const currentIndex = computed(() => Math.max(0, props.options.indexOf(props.modelValue)))
+const currentIndex = computed(() =>
+  Math.max(0, props.options?.findIndex((o) => o.value === props.modelValue) ?? 0)
+)
+
+const current = computed(() => props.options?.[currentIndex.value])
 
 // As setas percorrem as opções em ciclo, inclusive do fim para o começo.
 function step(offset: number): void {
-  console.log('🚀 ~ step ~ offset:', offset)
-  const total = props.options.length
+  const total = props.options?.length ?? 0
   if (total === 0) return
 
-  const next = props.options[(currentIndex.value + offset + total) % total]
-  if (next) emit('update:modelValue', next)
+  const next = props.options?.[(currentIndex.value + offset + total) % total]
+  if (next) emit('update:modelValue', next.value)
 }
 </script>
 
 <template>
   <div class="view-switcher" role="group" aria-label="Trocar visão">
-    <span class="view-switcher__label">{{ modelValue }}</span>
+    <span class="view-switcher__label">{{ current?.label ?? modelValue }}</span>
 
     <div class="view-switcher__arrows">
       <button

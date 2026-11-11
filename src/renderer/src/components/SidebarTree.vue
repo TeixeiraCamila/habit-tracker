@@ -1,45 +1,56 @@
 <script setup lang="ts">
-import { TreeGroup } from '@renderer/types/tree'
 import { ref } from 'vue'
+import type { TreeGroup, TreeHabit } from '@renderer/types/tree'
+import GroupRow from './GroupRow.vue'
+import HabitRow from './HabitRow.vue'
+import TreeGuide from './TreeGuide.vue'
+import StarDivider from './StarDivider.vue'
 
 const props = defineProps<{
   groups: TreeGroup[]
+  ungrouped?: TreeHabit[]
   selectedHabitId?: number | null
 }>()
 
 defineEmits<{
-  'select-habit': [habitId: number]
+  'select-habit': [id: number]
   'context-menu': [payload: { kind: 'group' | 'habit'; id: number; event: MouseEvent }]
 }>()
 
-const expanded = ref(new Set<number>(props.groups.map((g) => g.id)))
-function toggleGroup(groupId: number): void {
-  if (expanded.value.has(groupId)) expanded.value.delete(groupId)
-  else expanded.value.add(groupId)
+const collapsed = ref(new Set<number>(props.groups.map((g) => g.id)))
+const isOpen = (id: number): boolean => !collapsed.value.has(id)
+
+function toggle(id: number): void {
+  if (collapsed.value.has(id)) collapsed.value.delete(id)
+  else collapsed.value.add(id)
 }
 
 defineExpose({
-  collapseAll: () => expanded.value.clear(),
-  expandAll: () => (expanded.value = new Set(props.groups.map((g) => g.id)))
+  collapseAll: (): void => {
+    collapsed.value = new Set(props.groups.map((g) => g.id))
+  },
+  expandAll: (): void => {
+    collapsed.value.clear()
+  }
 })
 </script>
 
 <template>
   <nav class="sidebar-tree" aria-label="Grupos e hábitos">
-    <div v-for="group in groups" :key="group.id" class="sidebar-tree__group">
+    <section v-for="group in groups" :key="group.id" class="sidebar-tree__group">
       <GroupRow
         :name="group.name"
         :color="group.color"
         :icon="group.icon"
-        :expanded="expanded.has(group.id)"
-        @toggle="toggleGroup(group.id)"
+        :expanded="isOpen(group.id)"
+        @toggle="toggle(group.id)"
         @context-menu="$emit('context-menu', { kind: 'group', id: group.id, event: $event })"
       />
 
       <div
-        :class="{ open: expanded.has(group.id) }"
-        class="sidebar-tree__children"
-        :inert="!expanded.has(group.id)"
+        :class="{ open: isOpen(group.id) }"
+        class="collapse sidebar-tree__children"
+        :inert="!isOpen(group.id)"
       >
         <div class="collapse-inner">
           <TreeGuide :color="group.color">
@@ -55,7 +66,20 @@ defineExpose({
           </TreeGuide>
         </div>
       </div>
-    </div>
+    </section>
+
+    <section v-if="ungrouped?.length" class="sidebar-tree__ungrouped">
+      <p class="sidebar-tree__label">Sem grupo</p>
+      <HabitRow
+        v-for="habit in ungrouped"
+        :key="habit.id"
+        :name="habit.name"
+        :icon="habit.icon"
+        :selected="habit.id === selectedHabitId"
+        @select="$emit('select-habit', habit.id)"
+        @context-menu="$emit('context-menu', { kind: 'habit', id: habit.id, event: $event })"
+      />
+    </section>
 
     <StarDivider />
   </nav>

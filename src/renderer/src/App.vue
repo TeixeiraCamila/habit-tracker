@@ -1,34 +1,49 @@
-// App principal do renderer: monta a sidebar com header, seletor de visão e árvore de hábitos.
+// App principal do renderer: monta a sidebar com header, seletor de visao e arvore de habitos.
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@renderer/components/AppHeader.vue'
 import ViewSwitcher from '@renderer/components/ViewSwitcher.vue'
 import SidebarTree from '@renderer/components/SidebarTree.vue'
 import ActionBar from '@renderer/components/ActionBar.vue'
-import { mockTree } from '@renderer/mocks/tree'
+import Toast from '@renderer/components/Toast.vue'
+import { useGroupsStore } from '@renderer/stores/groups'
+import { useHabitsStore } from '@renderer/stores/habits'
+import { useTree } from '@renderer/composables/useTree'
+import { useToast } from '@renderer/composables/useToast'
+import { errorMessage } from '@renderer/utils/errors'
 
 const route = useRoute()
 const router = useRouter()
+const groupsStore = useGroupsStore()
+const habitsStore = useHabitsStore()
+const { treeGroups, ungrouped } = useTree()
+const { toast, error, dismiss } = useToast()
 
-const groups = mockTree
-const habitCount = groups.reduce((n, g) => n + g.habits.length, 0)
 const selectedHabitId = ref<number | null>(null)
 const tree = ref<InstanceType<typeof SidebarTree> | null>(null)
 
-const views = ['Hoje', 'Semana', 'Mês', 'Estatísticas']
-
-const viewRoutes: Record<string, string> = {
-  Hoje: 'today',
-  Semana: 'week',
-  Mês: 'month',
-  Estatísticas: 'stats'
-}
+const views = [
+  { value: 'today', label: 'Hoje' },
+  { value: 'week', label: 'Semana' },
+  { value: 'month', label: 'Mes' },
+  { value: 'stats', label: 'Estatisticas' }
+]
 
 const view = computed({
-  get: (): string =>
-    views.find((option) => viewRoutes[option] === String(route.name ?? 'today')) ?? views[0],
-  set: (name: string) => router.push({ name: viewRoutes[name] ?? 'today' })
+  get: (): string => String(route.name ?? 'today'),
+  set: (name: string) => router.push({ name })
+})
+
+onMounted(async () => {
+  // rede de seguranca: qualquer chamada sem tratamento vira toast
+  window.addEventListener('unhandledrejection', (e) => error(errorMessage(e.reason)))
+
+  try {
+    await Promise.all([groupsStore.load(), habitsStore.load()])
+  } catch (e) {
+    error(errorMessage(e))
+  }
 })
 </script>
 
@@ -37,8 +52,8 @@ const view = computed({
     <aside class="sidebar">
       <AppHeader
         title="habits"
-        :habit-count="habitCount"
-        :group-count="groups.length"
+        :habit-count="habitsStore.items.length"
+        :group-count="groupsStore.items.length"
         @open-settings="router.push({ name: 'settings' })"
         @open-dev="router.push({ name: 'test' })"
       />
@@ -48,7 +63,8 @@ const view = computed({
       <div class="tree-scroll">
         <SidebarTree
           ref="tree"
-          :groups="groups"
+          :groups="treeGroups"
+          :ungrouped="ungrouped"
           :selected-habit-id="selectedHabitId"
           @select-habit="selectedHabitId = $event"
         />
@@ -59,6 +75,14 @@ const view = computed({
     <main class="content">
       <RouterView />
     </main>
+
+    <Toast
+      v-if="toast"
+      :key="toast.id"
+      :message="toast.message"
+      :kind="toast.kind"
+      @dismiss="dismiss"
+    />
   </div>
 </template>
 

@@ -44,10 +44,25 @@ export interface Completion {
 }
 
 export interface Settings {
-  daysStartAt: string
-  weekStartOn: 0 | 1
+  dayStartsAt: string
+  weekStartsOn: 0 | 1
   notifications: boolean
   launchAtLogin: boolean
   minimizeToTray: boolean
   autoBackup: boolean
+}
+
+export interface HabitStats {
+  habitId: number
+  currentStreak: number
+  bestStreak: number
+  totalCompletions: number
+  completionRate: number
+}
+
+export interface Overview {
+  totalHabits: number
+  totalCompletions: number
+  completionRate: number
+  currentStreak: number
 }

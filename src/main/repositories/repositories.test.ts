@@ -92,8 +92,8 @@ describe('completions', () => {
 describe('settings', () => {
   it('devolve os padrões e guarda só o que mudou', () => {
     const repo = settingsRepo(db)
-    expect(repo.get().weekStartOn).toBe(0)
-    expect(repo.set({ weekStartOn: 0 }).weekStartOn).toBe(0)
+    expect(repo.get().weekStartsOn).toBe(0)
+    expect(repo.set({ weekStartsOn: 0 }).weekStartsOn).toBe(0)
     expect(repo.get().notifications).toBe(true)
   })
 })

@@ -29,7 +29,7 @@ export function completionsRepo(db: Db): CompletionsRepo {
     range(from: string, to: string): Completion[] {
       const rows = db
         .prepare(
-          'SELECT id, habit_id, date, value, note FROM completions WHERE date BETWEEN ? AND ? ORDER BY date'
+          'SELECT id, habit_id, date, value, note FROM completions WHERE date BETWEEN ? AND ? ORDER BY habit_id, date'
         )
         .all(from, to) as CompletionRow[]
       return rows.map(toCompletion)

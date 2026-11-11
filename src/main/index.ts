@@ -8,6 +8,8 @@ import icon from '../../resources/icon.png?asset'
 import { migrate } from './db/migrate'
 import { closeDb, initDb } from './db/connection'
 import { dbPath } from './paths'
+import { seedDev } from './db/seed'
+import { registerIpc } from './ipc'
 
 // Só a própria UI do app pode ser carregada na janela.
 function isAppUrl(rawUrl: string): boolean {
@@ -67,6 +69,9 @@ function createWindow(): void {
 }
 
 // Executa a inicialização quando o Electron termina de carregar.
+// dev usa uma pasta propria, para o seed nunca sujar os dados do app instalado
+if (is.dev) app.setPath('userData', `${app.getPath('userData')}-dev`)
+
 app
   .whenReady()
   .then(async () => {
@@ -83,8 +88,12 @@ app
       callback(false)
     )
 
-    // Abre o banco (cria o arquivo se ainda não existir) e aplica o schema.
-    migrate(initDb(dbPath()))
+    const db = initDb(dbPath())
+    migrate(db)
+    if (is.dev && process.env['HABIT_SEED']) {
+      console.log(seedDev(db) ? '[seed] dados criados' : '[seed] o banco já tem dados')
+    }
+    registerIpc(db)
     createWindow()
 
     // No macOS, recria a janela quando o ícone do dock é clicado.
