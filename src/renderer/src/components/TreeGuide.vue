@@ -20,6 +20,7 @@ const style = computed(() => ({ '--guide-color': `var(--group-${props.color})` }
   align-items: stretch;
   gap: var(--space-2);
   padding-left: var(--space-4);
+  padding-bottom: var(--space-2);
 }
 
 .tree-guide__line {

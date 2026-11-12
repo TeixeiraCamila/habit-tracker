@@ -111,7 +111,7 @@ onBeforeUnmount(() => {
 }
 
 .modal {
-  width: min(480px, 100%);
+  width: min(600px, 100%);
   max-height: 100%;
   padding: var(--space-6);
   overflow: auto;

@@ -35,7 +35,7 @@ Linha de grupo: fundo pastel, chevron de expandir, ícone de traço e nome na co
 
 ### HabitRow
 
-Linha de hábito: ícone e nome. Quando selecionada, vira cartão com borda e sombra suave, e o nome fica em negrito.
+Linha de hábito: ícone e nome. Quando selecionada, vira cartão com borda e sombra suave, e o nome fica em negrito. Toggle o selecionado.
 
 - Props: `name`, `icon`, `selected`
 - Emits: `select`, `context-menu`

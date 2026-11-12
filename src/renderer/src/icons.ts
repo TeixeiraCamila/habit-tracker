@@ -79,3 +79,5 @@ const icons: Record<string, LucideIcon> = {
 }
 
 export const getIcon = (name: string): LucideIcon => icons[name] ?? icons.circle
+
+export const iconNames = Object.keys(icons)

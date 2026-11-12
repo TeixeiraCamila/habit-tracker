@@ -106,3 +106,81 @@ textarea,
     scroll-behavior: auto !important;
   }
 }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+
+.field-label {
+  color: var(--text);
+  font-size: var(--text-sm);
+}
+
+.field-error {
+  color: var(--group-red);
+  font-size: var(--text-xs);
+}
+
+.input {
+  height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-title);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--group-red);
+}
+
+.row {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.row > .field {
+  flex: 1;
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-title);
+  font-size: var(--text-sm);
+  user-select: none;
+}
+
+.days {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.day {
+  flex: 1;
+  height: 36px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--text-xs);
+}
+
+.day.on {
+  border-color: var(--text-title);
+  background: var(--text-title);
+  color: var(--bg);
+  font-weight: 700;
+}
