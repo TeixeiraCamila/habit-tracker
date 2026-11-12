@@ -1,4 +1,5 @@
-export type ActionKey = 'new-habit' | 'new-group' | 'sort' | 'toggle-view' | 'collapse-all'
+export type ActionKey =
+  'new-habit' | 'new-group' | 'sort' | 'toggle-view' | 'collapse-all' | 'edit-habit'
 
 export interface ActionItem {
   key: ActionKey

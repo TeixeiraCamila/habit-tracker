@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { ACTION_ITEMS, type ActionKey } from './actions'
+import { computed } from 'vue'
+import { ACTION_ITEMS, type ActionItem, type ActionKey } from './actions'
 import IconButton from './IconButton.vue'
+import type { Habit } from '@shared/types'
 
-withDefaults(defineProps<{ activeAction?: ActionKey | null }>(), { activeAction: null })
+const props = withDefaults(
+  defineProps<{
+    activeAction?: ActionKey | null
+    selectedHabit?: Habit | null
+  }>(),
+  { activeAction: null, selectedHabit: null }
+)
 
 const emit = defineEmits<{
   'new-habit': []
@@ -10,13 +18,28 @@ const emit = defineEmits<{
   sort: []
   'toggle-view': []
   'collapse-all': []
+  'edit-habit': [habit: Habit]
 }>()
 
-function run(key: ActionKey): void {
-  if (key === 'new-habit') emit('new-habit')
-  else if (key === 'new-group') emit('new-group')
-  else if (key === 'sort') emit('sort')
-  else if (key === 'toggle-view') emit('toggle-view')
+const editingHabit = computed<Habit | null>(() => props.selectedHabit)
+const isEditing = computed(() => props.selectedHabit != null)
+
+const actions = computed<ActionItem[]>(() =>
+  ACTION_ITEMS.map((action) =>
+    action.key === 'new-habit' && isEditing.value
+      ? { ...action, key: 'edit-habit', label: 'Editar hábito', icon: 'pencil' }
+      : action
+  )
+)
+
+function run(action: ActionItem): void {
+  if (action.key === 'new-habit') emit('new-habit')
+  else if (action.key === 'edit-habit') {
+    const habit = editingHabit.value
+    if (habit) emit('edit-habit', habit)
+  } else if (action.key === 'new-group') emit('new-group')
+  else if (action.key === 'sort') emit('sort')
+  else if (action.key === 'toggle-view') emit('toggle-view')
   else emit('collapse-all')
 }
 </script>
@@ -25,12 +48,13 @@ function run(key: ActionKey): void {
   <footer class="action-bar" role="toolbar" aria-label="Ações">
     <div class="action-bar__group">
       <IconButton
-        v-for="action in ACTION_ITEMS"
+        v-for="action in actions"
         :key="action.key"
         :icon="action.icon"
         :label="action.label"
         :active="activeAction === action.key"
-        @click="run(action.key)"
+        :class="{ 'is-edit': action.key === 'edit-habit' }"
+        @click="run(action)"
       />
     </div>
   </footer>
@@ -50,5 +74,11 @@ function run(key: ActionKey): void {
   display: flex;
   gap: var(--space-2);
   align-items: center;
+}
+
+.action-bar .icon-button.is-edit {
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  box-shadow: none;
 }
 </style>
