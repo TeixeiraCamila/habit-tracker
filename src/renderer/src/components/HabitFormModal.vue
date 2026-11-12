@@ -142,6 +142,23 @@ async function save(): Promise<void> {
     saving.value = false
   }
 }
+
+const deleting = ref(false)
+
+async function deleteHabit(): Promise<void> {
+  const habit = props.habit
+  if (!habit) return
+  if (!window.confirm(`Excluir o hábito "${habit.name}"? Essa ação não pode ser desfeita.`)) return
+  deleting.value = true
+  try {
+    await habits.remove(habit.id)
+    emit('close')
+  } catch (e) {
+    formError.value = errorMessage(e)
+  } finally {
+    deleting.value = false
+  }
+}
 </script>
 
 <template>
@@ -295,6 +312,15 @@ async function save(): Promise<void> {
     </form>
 
     <template #footer>
+      <button
+        v-if="props.habit"
+        type="button"
+        class="btn btn-danger"
+        :disabled="deleting"
+        @click="deleteHabit"
+      >
+        Excluir hábito
+      </button>
       <button type="button" class="btn" @click="emit('close')">Cancelar</button>
       <button type="submit" form="habit-form" class="btn btn-primary" :disabled="saving">
         Salvar
@@ -314,5 +340,9 @@ async function save(): Promise<void> {
   height: auto;
   padding: var(--space-2) var(--space-3);
   resize: none;
+}
+
+.btn-danger {
+  font-weight: 700;
 }
 </style>

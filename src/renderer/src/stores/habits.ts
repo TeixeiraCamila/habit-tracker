@@ -31,6 +31,7 @@ export const useHabitsStore = defineStore('habits', () => {
   }
 
   async function remove(id: number): Promise<void> {
+    await api.habits.remove(id)
     items.value = items.value.filter((h) => h.id !== id)
   }
 
