@@ -1,6 +1,6 @@
 // App principal do renderer: monta a sidebar com header, seletor de visao e arvore de habitos.
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@renderer/components/AppHeader.vue'
 import ViewSwitcher from '@renderer/components/ViewSwitcher.vue'
@@ -12,6 +12,9 @@ import { useHabitsStore } from '@renderer/stores/habits'
 import { useTree } from '@renderer/composables/useTree'
 import { useToast } from '@renderer/composables/useToast'
 import { errorMessage } from '@renderer/utils/errors'
+import { Group, Habit } from '@shared/types'
+import GroupFormModal from './components/GroupFormModal.vue'
+import HabitFormModal from './components/HabitFormModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -23,6 +26,10 @@ const { toast, error, dismiss } = useToast()
 const selectedHabitId = ref<number | null>(null)
 const tree = ref<InstanceType<typeof SidebarTree> | null>(null)
 
+const selectedHabit = computed<Habit | null>(
+  () => habitsStore.items.find((habit) => habit.id === selectedHabitId.value) ?? null
+)
+
 const views = [
   { value: 'today', label: 'Hoje' },
   { value: 'week', label: 'Semana' },
@@ -30,6 +37,23 @@ const views = [
   { value: 'stats', label: 'Estatisticas' }
 ]
 
+const habitForm = reactive<{ open: boolean; habit: Habit | null }>({ open: false, habit: null })
+
+function openHabitForm(habit: Habit | null = null): void {
+  habitForm.open = true
+  habitForm.habit = habit
+}
+
+const groupForm = reactive<{ open: boolean; group: Group | null }>({ open: false, group: null })
+
+function openGroupForm(group: Group | null = null): void {
+  groupForm.open = true
+  groupForm.group = group
+}
+
+function handleSelectHabit(id: number, selected: boolean): void {
+  selectedHabitId.value = selected ? id : null
+}
 const view = computed({
   get: (): string => String(route.name ?? 'today'),
   set: (name: string) => router.push({ name })
@@ -66,10 +90,16 @@ onMounted(async () => {
           :groups="treeGroups"
           :ungrouped="ungrouped"
           :selected-habit-id="selectedHabitId"
-          @select-habit="selectedHabitId = $event"
+          @select-habit="handleSelectHabit"
         />
       </div>
-      <ActionBar @collapse-all="tree?.collapseAll()" />
+      <ActionBar
+        :selected-habit="selectedHabit"
+        @new-habit="openHabitForm()"
+        @new-group="openGroupForm()"
+        @edit-habit="openHabitForm"
+        @collapse-all="tree?.collapseAll()"
+      />
     </aside>
 
     <main class="content">
@@ -82,6 +112,18 @@ onMounted(async () => {
       :message="toast.message"
       :kind="toast.kind"
       @dismiss="dismiss"
+    />
+
+    <HabitFormModal
+      :open="habitForm.open"
+      :habit="habitForm.habit"
+      @close="habitForm.open = false"
+    />
+
+    <GroupFormModal
+      :open="groupForm.open"
+      :group="groupForm.group"
+      @close="groupForm.open = false"
     />
   </div>
 </template>

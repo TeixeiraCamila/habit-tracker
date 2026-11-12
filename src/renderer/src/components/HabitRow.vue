@@ -4,12 +4,16 @@ import { getIcon } from '@renderer/icons'
 
 const props = defineProps<{ name: string; icon: string; selected: boolean }>()
 
-defineEmits<{
-  select: []
+const emit = defineEmits<{
+  select: [selected: boolean]
   'context-menu': [event: MouseEvent]
 }>()
 
 const Icon = computed(() => getIcon(props.icon))
+
+function toggleSelected(): void {
+  emit('select', !props.selected)
+}
 </script>
 
 <template>
@@ -18,7 +22,7 @@ const Icon = computed(() => getIcon(props.icon))
     :class="{ 'is-selected': selected }"
     @contextmenu.prevent="$emit('context-menu', $event)"
   >
-    <button class="habit-row__main" type="button" :aria-pressed="selected" @click="$emit('select')">
+    <button class="habit-row__main" type="button" :aria-pressed="selected" @click="toggleSelected">
       <span class="habit-row__icon" aria-hidden="true">
         <component :is="Icon" :size="20" :stroke-width="1.75" />
       </span>

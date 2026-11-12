@@ -102,6 +102,10 @@ function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): vo
   const label = payload.kind === 'group' ? 'Grupo' : 'Hábito'
   showToast(`${label} #${payload.id} selecionado para o menu`)
 }
+
+function handleSelectHabit(id: number, selected: boolean): void {
+  selectedHabitId.value = selected ? id : null
+}
 </script>
 
 <template>
@@ -144,7 +148,7 @@ function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): vo
           :groups="groups"
           :habits="habits"
           :selected-habit-id="selectedHabitId"
-          @select-habit="selectedHabitId = $event"
+          @select-habit="handleSelectHabit"
           @toggle-group="showToast('Grupo alternado')"
           @reorder="handleReorder"
           @context-menu="handleContextMenu"
@@ -191,7 +195,7 @@ function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): vo
           name="Beber água"
           icon="Droplets"
           :selected="habitSelected"
-          @select="habitSelected = !habitSelected"
+          @select="habitSelected = $event"
           @context-menu="handleContextMenu({ kind: 'habit', id: 1 })"
         >
           <template #trailing>

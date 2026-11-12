@@ -13,7 +13,7 @@ const props = defineProps<{
 }>()
 
 defineEmits<{
-  'select-habit': [id: number]
+  'select-habit': [id: number, selected: boolean]
   'context-menu': [payload: { kind: 'group' | 'habit'; id: number; event: MouseEvent }]
 }>()
 
@@ -60,7 +60,7 @@ defineExpose({
               :name="habit.name"
               :icon="habit.icon"
               :selected="habit.id === selectedHabitId"
-              @select="$emit('select-habit', habit.id)"
+              @select="$emit('select-habit', habit.id, $event)"
               @context-menu="$emit('context-menu', { kind: 'habit', id: habit.id, event: $event })"
             />
           </TreeGuide>
@@ -76,7 +76,7 @@ defineExpose({
         :name="habit.name"
         :icon="habit.icon"
         :selected="habit.id === selectedHabitId"
-        @select="$emit('select-habit', habit.id)"
+        @select="$emit('select-habit', habit.id, $event)"
         @context-menu="$emit('context-menu', { kind: 'habit', id: habit.id, event: $event })"
       />
     </section>
