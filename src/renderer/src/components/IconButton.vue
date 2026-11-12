@@ -41,14 +41,17 @@ const emit = defineEmits<{ click: [event: MouseEvent] }>()
   height: 36px;
   color: var(--text-muted);
   border-radius: var(--radius-pill);
+  border: 1px solid transparent;
   transition:
     color var(--motion-fast) var(--ease-out),
-    background-color var(--motion-fast) var(--ease-out);
+    background-color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out);
 }
 
 .icon-button:hover:not(:disabled) {
   color: var(--text-title);
   background: var(--surface);
+  border-color: var(--text-muted);
 }
 
 .icon-button.is-active {
