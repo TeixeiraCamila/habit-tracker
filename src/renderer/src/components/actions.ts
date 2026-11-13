@@ -11,6 +11,6 @@ export const ACTION_ITEMS: ActionItem[] = [
   { key: 'new-habit', icon: 'plus', label: 'Novo hábito' },
   { key: 'new-group', icon: 'folder-plus', label: 'Novo grupo' },
   { key: 'sort', icon: 'arrow-up-down', label: 'Ordenar' },
-  { key: 'toggle-view', icon: 'repeat', label: 'Alternar visão' },
+  { key: 'toggle-view', icon: 'panel-left', label: 'Mostrar/ocultar sidebar' },
   { key: 'collapse-all', icon: 'chevrons-up', label: 'Recolher tudo' }
 ]

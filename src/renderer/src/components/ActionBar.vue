@@ -33,14 +33,26 @@ const actions = computed<ActionItem[]>(() =>
 )
 
 function run(action: ActionItem): void {
-  if (action.key === 'new-habit') emit('new-habit')
-  else if (action.key === 'edit-habit') {
-    const habit = editingHabit.value
-    if (habit) emit('edit-habit', habit)
-  } else if (action.key === 'new-group') emit('new-group')
-  else if (action.key === 'sort') emit('sort')
-  else if (action.key === 'toggle-view') emit('toggle-view')
-  else emit('collapse-all')
+  switch (action.key) {
+    case 'new-habit':
+      emit('new-habit')
+      break
+    case 'new-group':
+      emit('new-group')
+      break
+    case 'sort':
+      emit('sort')
+      break
+    case 'toggle-view':
+      emit('toggle-view')
+      break
+    case 'collapse-all':
+      emit('collapse-all')
+      break
+    case 'edit-habit':
+      if (editingHabit.value) emit('edit-habit', editingHabit.value)
+      break
+  }
 }
 </script>
 

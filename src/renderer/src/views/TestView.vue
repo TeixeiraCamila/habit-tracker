@@ -64,7 +64,7 @@ const habits = ref<Habit[]>([
   makeHabit(5, 6, 'Codar', 'moon')
 ])
 
-const view = ref('Hoje')
+const view = ref('today')
 const selectedHabitId = ref<number | null>(1)
 const groupExpanded = ref(true)
 const habitSelected = ref(true)
@@ -88,17 +88,11 @@ function selectAction(action: ActionKey, message: string): void {
   showToast(message)
 }
 
-function handleReorder(payload: { habitId: number; targetId: number }): void {
-  const from = habits.value.findIndex((habit) => habit.id === payload.habitId)
-  const to = habits.value.findIndex((habit) => habit.id === payload.targetId)
-  if (from < 0 || to < 0) return
-
-  const [moved] = habits.value.splice(from, 1)
-  if (moved) habits.value.splice(to, 0, moved)
-  showToast('Hábitos reordenados')
-}
-
-function handleContextMenu(payload: { kind: 'group' | 'habit'; id: number }): void {
+function handleContextMenu(payload: {
+  kind: 'group' | 'habit'
+  id: number
+  event: MouseEvent
+}): void {
   const label = payload.kind === 'group' ? 'Grupo' : 'Hábito'
   showToast(`${label} #${payload.id} selecionado para o menu`)
 }
@@ -140,17 +134,14 @@ function handleSelectHabit(id: number, selected: boolean): void {
     <section class="ds-section">
       <h2>SidebarTree</h2>
       <p class="ds-note">
-        Grupos, hábitos, seção sem grupo e divisor final. Arraste um hábito sobre outro para
-        reordenar.
+        Grupos com seus hábitos, seção sem grupo e divisor final; cada grupo expande e recolhe.
       </p>
       <div class="ds-sidebar">
         <SidebarTree
           :groups="groups"
-          :habits="habits"
+          :ungrouped="habits.filter((h) => h.groupId === null)"
           :selected-habit-id="selectedHabitId"
           @select-habit="handleSelectHabit"
-          @toggle-group="showToast('Grupo alternado')"
-          @reorder="handleReorder"
           @context-menu="handleContextMenu"
         />
       </div>
@@ -163,26 +154,26 @@ function handleSelectHabit(id: number, selected: boolean): void {
         <GroupRow
           name="Saúde"
           color="orange"
-          icon="Sun"
+          icon="sun"
           :expanded="groupExpanded"
           @toggle="groupExpanded = !groupExpanded"
-          @context-menu="handleContextMenu({ kind: 'group', id: 1 })"
+          @context-menu="handleContextMenu({ kind: 'group', id: 1, event: $event })"
         />
         <GroupRow
           name="Estudos"
           color="yellow"
-          icon="BookOpen"
+          icon="book-open"
           :expanded="false"
           @toggle="() => {}"
-          @context-menu="handleContextMenu({ kind: 'group', id: 2 })"
+          @context-menu="handleContextMenu({ kind: 'group', id: 2, event: $event })"
         />
         <GroupRow
           name="Bem-estar"
           color="green"
-          icon="Heart"
+          icon="heart"
           :expanded="true"
           @toggle="() => {}"
-          @context-menu="handleContextMenu({ kind: 'group', id: 3 })"
+          @context-menu="handleContextMenu({ kind: 'group', id: 3, event: $event })"
         />
       </div>
     </section>
@@ -193,10 +184,10 @@ function handleSelectHabit(id: number, selected: boolean): void {
       <div class="ds-stack">
         <HabitRow
           name="Beber água"
-          icon="Droplets"
+          icon="droplets"
           :selected="habitSelected"
           @select="habitSelected = $event"
-          @context-menu="handleContextMenu({ kind: 'habit', id: 1 })"
+          @context-menu="handleContextMenu({ kind: 'habit', id: 1, event: $event })"
         >
           <template #trailing>
             <IconButton icon="check" label="Marcar hábito" active />
@@ -204,10 +195,10 @@ function handleSelectHabit(id: number, selected: boolean): void {
         </HabitRow>
         <HabitRow
           name="Ler 20 páginas"
-          icon="BookOpen"
+          icon="book-open"
           :selected="false"
           @select="() => {}"
-          @context-menu="handleContextMenu({ kind: 'habit', id: 3 })"
+          @context-menu="handleContextMenu({ kind: 'habit', id: 3, event: $event })"
         />
       </div>
     </section>
@@ -217,8 +208,8 @@ function handleSelectHabit(id: number, selected: boolean): void {
       <p class="ds-note">Linha-guia vertical de 1 px na cor do grupo.</p>
       <div class="ds-stack">
         <TreeGuide color="orange">
-          <HabitRow name="Meditar" icon="Leaf" :selected="false" @select="() => {}" />
-          <HabitRow name="Alongar" icon="Dumbbell" :selected="false" @select="() => {}" />
+          <HabitRow name="Meditar" icon="leaf" :selected="false" @select="() => {}" />
+          <HabitRow name="Alongar" icon="dumbbell" :selected="false" @select="() => {}" />
         </TreeGuide>
       </div>
     </section>
@@ -242,6 +233,7 @@ function handleSelectHabit(id: number, selected: boolean): void {
           @sort="selectAction('sort', 'Ordenar')"
           @toggle-view="selectAction('toggle-view', 'Alternar visão')"
           @collapse-all="selectAction('collapse-all', 'Recolher tudo')"
+          @edit-habit="selectAction('edit-habit', 'Editar hábito')"
         />
       </div>
     </section>

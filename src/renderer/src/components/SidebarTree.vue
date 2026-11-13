@@ -17,7 +17,8 @@ defineEmits<{
   'context-menu': [payload: { kind: 'group' | 'habit'; id: number; event: MouseEvent }]
 }>()
 
-const collapsed = ref(new Set<number>(props.groups.map((g) => g.id)))
+// Estado interno: ids de grupos recolhidos; um grupo novo nasce aberto.
+const collapsed = ref<Set<number>>(new Set())
 const isOpen = (id: number): boolean => !collapsed.value.has(id)
 
 function toggle(id: number): void {

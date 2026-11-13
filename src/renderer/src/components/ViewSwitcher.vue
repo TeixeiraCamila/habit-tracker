@@ -46,7 +46,7 @@ function step(offset: number): void {
         aria-label="Visão anterior"
         @click="step(-1)"
       >
-        <AppIcon name="chevron-down" :size="13" class="view-switcher__icon--up" />
+        <AppIcon name="chevron-up" :size="13" class="view-switcher__icon" />
       </button>
       <button
         class="view-switcher__arrow"
@@ -54,7 +54,7 @@ function step(offset: number): void {
         aria-label="Próxima visão"
         @click="step(1)"
       >
-        <AppIcon name="chevron-down" :size="13" />
+        <AppIcon name="chevron-down" :size="13" class="view-switcher__icon" />
       </button>
     </div>
   </div>
@@ -106,9 +106,5 @@ function step(offset: number): void {
 
 .view-switcher__arrow + .view-switcher__arrow {
   border-top: 1px solid var(--surface-border);
-}
-
-.view-switcher__icon--up {
-  transform: rotate(180deg);
 }
 </style>
