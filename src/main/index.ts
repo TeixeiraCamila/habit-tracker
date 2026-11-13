@@ -76,7 +76,7 @@ app
   .whenReady()
   .then(async () => {
     // Identifica o app no Windows para agrupamento e notificações.
-    electronApp.setAppUserModelId('com.electron')
+    electronApp.setAppUserModelId('com.habittracker.app')
 
     // Mantém os atalhos padrão de devtools e recarregamento em desenvolvimento.
     app.on('browser-window-created', (_, window) => {

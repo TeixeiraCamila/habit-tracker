@@ -2,6 +2,33 @@
 
 App desktop pessoal para acompanhar hábitos diários · Vue 3 + TypeScript + Vite + Electron
 
+## Estado atual do repositório
+
+Análise de `github.com/TeixeiraCamila/habit-tracker` (branch `main`). O plano abaixo reflete o que já está implementado.
+
+| Fase   | Status        | O que existe no código                                                                                                                                                                            |
+| ------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0      | Concluída     | electron-vite, Vue 3 + TypeScript, Pinia, Vue Router (hash), ESLint, Prettier, `vue-tsc`, Vitest e CI; segurança do Electron (sandbox, CSP, navegação bloqueada); aliases `@shared` e `@renderer` |
+| 1      | Concluída     | `tokens.css` com 7 cores de grupo e contraste AA, Courier Prime, `base.css`, 18 componentes, sidebar e layout, catálogo em `/test` (só em dev)                                                    |
+| 2      | Concluída     | `better-sqlite3`, migração `001_init.sql`, repositórios, schemas Zod, IPC com `IpcResult`, preload tipado, seed (`npm run dev:seed`) e testes                                                     |
+| 3      | Em andamento  | stores, sidebar com dados reais, modais de grupo e hábito com validação, edição de hábito pela barra de ações                                                                                     |
+| 4 a 10 | Não iniciadas | só existem arquivos placeholders (views, stores `today` e `settings`, serviços e handlers de estatísticas e dados)                                                                                |
+
+**Pendências conhecidas no código**
+
+- Nenhuma pendência está aberta no momento; todas foram resolvidas:
+
+  1. O `remove` do store de hábitos passa a chamar `api.habits.remove` e limpar a lista local.
+  2. O `App.vue` trata o `context-menu` da `SidebarTree`, abrindo o formulário de edição (grupo ou hábito).
+  3. As ações `sort` e `toggle-view` da `ActionBar` ganharam handler no shell; `toggle-view` vira o toggle da sidebar.
+  4. O seed passou a usar ícones no formato kebab-case (`sunrise`), alinhado ao mapa de `icons.ts`.
+  5. Código legado de arquivar hábitos removido (coluna `archived_at`, IPC, preload, `Api`, store, tipo e teste).
+  6. `schemas.ts` sem `.optional()` duplicado e mensagem de nome corrigida para "Use no máximo 60 caracteres".
+  7. Removido o `console.log` de depuração de `habits.load`.
+  8. `package.json`, `electron-builder.yml` e `setAppUserModelId` com valores da aplicação (`com.habittracker.app`, descrição e autor do projeto).
+
+- `README.md` e `AGENTS.md` atualizados para refletir os estados de fase e a regra de exclusão.
+
 ## 1. Visão geral
 
 Um aplicativo desktop, local-first e offline, para registrar hábitos diários, acompanhar sequências (streaks) e visualizar progresso. Sem conta, sem servidor, sem nuvem: os dados ficam em um arquivo SQLite na máquina da usuária.
@@ -23,7 +50,7 @@ Um aplicativo desktop, local-first e offline, para registrar hábitos diários, 
 - Visão semanal e mensal (calendário de hábitos).
 - Streak atual, maior streak e taxa de conclusão.
 - Heatmap anual por hábito.
-- Arquivar e restaurar hábitos (sem perder histórico).
+- Sidebar com toggle para mostrar/ocultar, com atalho `Ctrl/Cmd+B`.
 - Notas opcionais por check-in.
 - Exportar/importar dados (JSON) e backup do banco.
 - Notificações de lembrete e ícone na bandeja.
@@ -53,25 +80,27 @@ Um aplicativo desktop, local-first e offline, para registrar hábitos diários, 
 
 ## 3. Tecnologias
 
-| Camada        | Escolha                                      | Motivo                                                                                              |
-| ------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| UI            | Vue 3 (Composition API, `<script setup>`)    | Stack principal da usuária                                                                          |
-| Linguagem     | TypeScript                                   | Tipos compartilhados entre main, preload e renderer                                                 |
-| Build         | Vite + **electron-vite**                     | Config pronta para main/preload/renderer com HMR; menos setup manual que juntar plugins             |
-| Desktop       | Electron                                     | Pedido do projeto; ecossistema maduro                                                               |
-| Empacotamento | electron-builder                             | Gera `.exe`, `.dmg`, `.AppImage`/`.deb`                                                             |
-| Estado        | Pinia                                        | Padrão do Vue 3, simples                                                                            |
-| Rotas         | Vue Router (hash mode)                       | Hash mode funciona bem com `file://`                                                                |
-| Banco         | **SQLite via better-sqlite3**                | Local, rápido, transacional, síncrono no main; melhor que JSON/localStorage para consultas por data |
-| Migrações     | Arquivos `.sql` numerados + runner simples   | Sem ORM: menos camadas, mais controle                                                               |
-| Validação     | Zod                                          | Validar payloads de IPC e import de JSON                                                            |
-| Datas         | date-fns                                     | Leve, tree-shakeable                                                                                |
-| Ícones        | lucide-vue-next                              | Ícones de traço fino, parecidos com os do print                                                     |
-| Fonte         | Courier Prime (`@fontsource/courier-prime`)  | Monoespaçada serifada, próxima à do print; embutida para funcionar offline                          |
-| Gráficos      | SVG próprio (heatmap e barras)               | Evita dependência pesada para gráficos simples                                                      |
-| Testes        | Vitest (unit) + Playwright (e2e do Electron) | Vitest já é usado pela usuária                                                                      |
-| Qualidade     | ESLint + Prettier + `vue-tsc`                | Padronização e checagem de tipos                                                                    |
-| CI            | GitHub Actions (build matrix win/mac/linux)  | Gerar instaladores automaticamente                                                                  |
+| Camada        | Escolha                                                                  | Motivo                                                                                              |
+| ------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| UI            | Vue 3 (Composition API, `<script setup>`)                                | Stack principal da usuária                                                                          |
+| Linguagem     | TypeScript                                                               | Tipos compartilhados entre main, preload e renderer                                                 |
+| Build         | Vite + **electron-vite**                                                 | Config pronta para main/preload/renderer com HMR; menos setup manual que juntar plugins             |
+| Desktop       | Electron                                                                 | Pedido do projeto; ecossistema maduro                                                               |
+| Empacotamento | electron-builder                                                         | Gera `.exe`, `.dmg`, `.AppImage`/`.deb`                                                             |
+| Estado        | Pinia                                                                    | Padrão do Vue 3, simples                                                                            |
+| Rotas         | Vue Router (hash mode)                                                   | Hash mode funciona bem com `file://`                                                                |
+| Banco         | **SQLite via better-sqlite3**                                            | Local, rápido, transacional, síncrono no main; melhor que JSON/localStorage para consultas por data |
+| Migrações     | Arquivos `.sql` numerados + runner simples                               | Sem ORM: menos camadas, mais controle                                                               |
+| Validação     | Zod                                                                      | Validar payloads de IPC e import de JSON                                                            |
+| Datas         | Utilitários próprios (shared/date.ts)                                    | Só toDateKey e addDays por enquanto; date-fns entra se o cálculo de streaks pedir                   |
+| Ícones        | lucide-vue-next                                                          | Ícones de traço fino, parecidos com os do print                                                     |
+| Fonte         | Courier Prime (`@fontsource/courier-prime`)                              | Monoespaçada serifada, próxima à do print; embutida para funcionar offline                          |
+| Gráficos      | SVG próprio (heatmap e barras)                                           | Evita dependência pesada para gráficos simples                                                      |
+| Testes        | Vitest (unit, já configurado) + Playwright (e2e, previsto para a Fase 9) | Vitest já é usado pela usuária                                                                      |
+| Qualidade     | ESLint + Prettier + `vue-tsc`                                            | Padronização e checagem de tipos                                                                    |
+| CI            | GitHub Actions (build matrix win/mac/linux)                              | Gerar instaladores automaticamente                                                                  |
+
+**Versões no repositório:** Node 24 (`.nvmrc`), Electron 44, Vite 8, Vue 3.5, Pinia 4, Vue Router 5, Zod 4, better-sqlite3 13, Vitest 5, ESLint 10 e TypeScript 5.9. O `electron-updater` já está nas dependências, mas sem configuração real.
 
 ### 3.1 Alternativas avaliadas
 
@@ -103,36 +132,43 @@ Um aplicativo desktop, local-first e offline, para registrar hábitos diários, 
 habit-tracker/
 ├─ src/
 │  ├─ main/
-│  │  ├─ index.ts            # janela, ciclo de vida do app
+│  │  ├─ index.ts            # janela, segurança, ciclo de vida, banco e IPC
+│  │  ├─ paths.ts            # caminho do banco (userData)
 │  │  ├─ db/
-│  │  │  ├─ connection.ts    # abre o SQLite
+│  │  │  ├─ connection.ts    # abre o SQLite (WAL, foreign keys)
 │  │  │  ├─ migrate.ts       # runner de migrações
-│  │  │  └─ migrations/      # 001_init.sql, 002_...
-│  │  ├─ repositories/       # groups.ts, habits.ts, completions.ts, settings.ts
-│  │  ├─ ipc/                # handlers por domínio
-│  │  ├─ services/           # stats, backup, notifications, tray
-│  │  └─ paths.ts            # userData, backups
+│  │  │  ├─ seed.ts          # dados de desenvolvimento
+│  │  │  └─ migrations/001_init.sql
+│  │  ├─ repositories/       # groups, habits, completions, settings
+│  │  ├─ ipc/                # handle.ts, errors.ts e um handler por domínio
+│  │  └─ services/           # stats, backup, notifications, tray (placeholders)
 │  ├─ preload/
-│  │  └─ index.ts            # contextBridge -> window.api
+│  │  ├─ index.ts            # contextBridge -> window.api
+│  │  └─ global.d.ts         # tipo de window.api
 │  ├─ shared/
-│  │  ├─ types.ts            # Habit, Group, Completion...
-│  │  ├─ schemas.ts          # Zod
-│  │  └─ ipc-channels.ts     # nomes dos canais
+│  │  ├─ types.ts, schemas.ts, api.ts, ipc-channels.ts
+│  │  └─ result.ts, defaults.ts, date.ts
 │  └─ renderer/
 │     ├─ index.html
 │     └─ src/
-│        ├─ main.ts
-│        ├─ App.vue
-│        ├─ router/
-│        ├─ stores/          # habits, groups, today, settings
-│        ├─ composables/     # useStreaks, useDate, useHotkeys
-│        ├─ components/      # SidebarTree, HabitRow, Heatmap, Modal...
-│        ├─ views/           # TodayView, WeekView, MonthView, StatsView, SettingsView
+│        ├─ main.ts, App.vue, api.ts, icons.ts
+│        ├─ router/          # rotas em hash mode (/test só em dev)
+│        ├─ stores/          # groups e habits (today e settings são placeholders)
+│        ├─ composables/     # useTree e useToast (useDate, useHotkeys, useStreaks: placeholders)
+│        ├─ components/      # 18 componentes + actions.ts, groupColors.ts, index.ts
+│        ├─ views/           # Today, Week, Month, Stats, Settings (placeholders) e TestView
+│        ├─ types/           # tree.ts
+│        ├─ utils/           # errors.ts, form.ts
+│        ├─ mocks/           # tree.ts (dados de exemplo)
 │        └─ styles/          # tokens.css, base.css
-├─ build/                    # ícones do app
+├─ tests/setup/renderer.ts   # mock de window.api (testes ficam ao lado do código, *.test.ts)
+├─ docs/                     # planejamento e componentes
+├─ build/ e resources/       # ícones
+├─ .github/workflows/ci.yml
 ├─ electron-builder.yml
 ├─ electron.vite.config.ts
-└─ tests/ (unit e e2e)
+├─ vitest.config.ts
+└─ AGENTS.md e README.md
 ```
 
 ### 4.3 API exposta pelo preload (contrato)
@@ -147,10 +183,9 @@ interface Api {
     reorder(ids: number[]): Promise<void>
   }
   habits: {
-    list(opts?: { archived?: boolean }): Promise<Habit[]>
+    list(): Promise<Habit[]>
     create(h: NewHabit): Promise<Habit>
     update(id: number, h: Partial<Habit>): Promise<Habit>
-    archive(id: number, archived: boolean): Promise<void>
     remove(id: number): Promise<void>
     reorder(groupId: number | null, ids: number[]): Promise<void>
   }
@@ -176,10 +211,20 @@ interface Api {
 
 1. **Datas como string local `YYYY-MM-DD`.** Evita bugs de fuso e horário de verão; um check-in pertence a um dia do calendário, não a um instante.
 2. **Streaks calculados, não armazenados.** Calculados a partir das conclusões e da frequência do hábito; assim editar o passado nunca deixa o streak inconsistente.
-3. **Arquivar em vez de apagar.** Preserva histórico; excluir definitivamente é ação explícita com confirmação.
-4. **Um check-in por (hábito, dia).** Chave única; `value` suporta hábitos de contador.
-5. **Virada do dia.** Preferência "o dia começa às HH:MM" (padrão 00:00, útil para quem dorme tarde).
-6. **Sem ORM e sem camada extra.** Repositórios simples com SQL preparado.
+3. **Um check-in por (hábito, dia).** Chave única; `value` suporta hábitos de contador.
+4. **Virada do dia.** Preferência "o dia começa às HH:MM" (padrão 00:00, útil para quem dorme tarde).
+5. **Sem ORM e sem camada extra.** Repositórios simples com SQL preparado.
+
+### 4.5 Convenções já implementadas
+
+- Canais IPC no formato `dominio.acao` (ex.: `groups.list`), todos em `shared/ipc-channels.ts`.
+- Todo handler do main passa por `handle()`: valida com Zod, devolve `IpcResult` (dados ou `message`), registra o detalhe no log e manda ao renderer só a mensagem legível. O preload desembrulha o resultado e lança um `Error`.
+- Erros do SQLite (chave estrangeira, único, não nulo, check) viram mensagens em português em `ipc/errors.ts`.
+- No renderer, `useToast` guarda um toast global e o `App.vue` converte `unhandledrejection` em toast; erros de formulário ficam dentro do modal.
+- Formulários usam os mesmos schemas Zod do main; `toFieldErrors` gera um erro por campo e `focusFirstError` foca o primeiro, via atributo `data-field`.
+- Em dev, a pasta `userData` ganha o sufixo `-dev` e `npm run dev:seed` cria 90 dias de dados determinísticos.
+- Os testes do `main` rodam dentro do Electron (`ELECTRON_RUN_AS_NODE=1`), para usar o mesmo `better-sqlite3` do app; os do renderer rodam em jsdom.
+- A rota `/test` (catálogo de componentes) e o botão DEV do cabeçalho só existem em desenvolvimento.
 
 ## 5. Design system
 
@@ -192,7 +237,7 @@ Baseado no print do app de notas: tema bege quente, tipografia monoespaçada, li
 - Tudo em monoespaçada; hierarquia por peso e cor, não por tamanho exagerado.
 - Detalhes lúdicos discretos (divisor de estrelas e luas).
 
-### 5.2 Tokens de cor (valores aproximados extraídos da imagem)
+### 5.2 Tokens de cor (valores do tokens.css, partindo da imagem e ajustados para contraste)
 
 | Token              | Valor                                                          | Uso                                  |
 | ------------------ | -------------------------------------------------------------- | ------------------------------------ |
@@ -200,20 +245,20 @@ Baseado no print do app de notas: tema bege quente, tipografia monoespaçada, li
 | `--surface`        | `#F4ECE4`                                                      | Cartões, item selecionado, dropdown  |
 | `--surface-border` | `#D9CFC5`                                                      | Borda de cartões e seleção           |
 | `--text-title`     | `#4A3520`                                                      | Títulos (ex.: "notebook")            |
-| `--text`           | `#7A6650`                                                      | Texto principal e itens              |
-| `--text-muted`     | `#A08C76`                                                      | Contadores, chevrons, ícones neutros |
+| `--text`           | `#6F5E4D`                                                      | Texto principal e itens              |
+| `--text-muted`     | `#6B5A47`                                                      | Contadores, chevrons, ícones neutros |
 | `--shadow`         | `0 2px 0 rgba(120,100,80,.25), 0 1px 4px rgba(120,100,80,.18)` | Cartão/seleção elevada               |
 
 **Paleta de grupos** (texto/ícone + fundo pastel)
 
 | Nome     | Texto/ícone | Fundo     |
 | -------- | ----------- | --------- |
-| Laranja  | `#D2603A`   | `#F0D6BE` |
-| Amarelo  | `#B8860B`   | `#F0E0BC` |
-| Verde    | `#1F7A4D`   | `#E3E0C8` |
-| Vermelho | `#C0392B`   | `#EFDAD3` |
+| Laranja  | `#9C3F1D`   | `#F0D6BE` |
+| Amarelo  | `#7D5F07`   | `#F0E0BC` |
+| Verde    | `#17613A`   | `#E3E0C8` |
+| Vermelho | `#B03224`   | `#EFDAD3` |
 
-Grupos extras a definir na Fase 1 (azul-acinzentado, lilás, rosa) mantendo o mesmo contraste e saturação baixa. A usuária escolhe a cor ao criar um grupo.
+Cores extras já definidas no `tokens.css`: Azul `#3F5F73` sobre `#D9E4EA`, Lilás `#6B4C8A` sobre `#E7DDF1` e Rosa `#9C3F5E` sobre `#F1DCE3`, somando 7 opções. Os tons de texto foram escurecidos para atingir contraste AA (4,5:1 ou mais) sobre o fundo pastel. A cor é escolhida ao criar o grupo.
 
 ### 5.3 Tipografia
 
@@ -236,13 +281,13 @@ Grupos extras a definir na Fase 1 (azul-acinzentado, lilás, rosa) mantendo o me
 - **Linha de hábito:** ícone + nome; item selecionado vira cartão com borda e sombra suave.
 - **Checkbox de hábito:** círculo vazio que preenche com a cor do grupo e um check animado.
 - **Divisor decorativo:** `*.☆.☽.☆.☽.☆.*` ao final da lista.
-- **Barra de ações inferior:** ícones de traço (novo hábito, novo grupo, ordenar, alternar visão, recolher tudo) com pílula de fundo no item ativo.
+- **Barra de ações inferior:** ícones de traço (novo hábito, novo grupo, ordenar, mostrar/ocultar sidebar, recolher tudo) com pílula de fundo no item ativo.
 - **Modal/Drawer, Toast, Tooltip, Campo de texto, Seletor de cor e ícone, Empty state** no mesmo estilo.
 - **Heatmap:** quadrados com raio pequeno, escala de 5 tons derivada da cor do grupo sobre `--surface`.
 
 ### 5.6 Layout da janela
 
-- Sidebar fixa (\~300 px) com árvore de grupos e hábitos, no estilo do print.
+- Sidebar de \~300 px com árvore de grupos e hábitos, no estilo do print, e toggle para mostrar/ocultar (botão e atalho Ctrl/Cmd+B); recolhida, a área principal ocupa a largura toda.
 - Área principal com a visão selecionada (Hoje, Semana, Mês, Estatísticas).
 - Largura mínima da janela: 880×600 px.
 - Tema escuro quente (marrom café) previsto como evolução; os tokens já nascem como variáveis CSS para isso.
@@ -283,7 +328,6 @@ CREATE TABLE habits (
   freq_times    INTEGER,                           -- para times_per_week
   reminder_time TEXT,                              -- 'HH:MM' ou NULL
   start_date    TEXT NOT NULL,                     -- 'YYYY-MM-DD'
-  archived_at   TEXT,
   position      INTEGER NOT NULL DEFAULT 0,
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -339,7 +383,6 @@ export interface Habit {
   freqTimes?: number
   reminderTime?: string
   startDate: string
-  archivedAt?: string
   position: number
 }
 
@@ -399,6 +442,8 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 0 — Setup do projeto e fundações
 
+**Status:** concluída. Node 24 (`.nvmrc`) e CI em `ubuntu-latest` com `format:check`, `lint`, `typecheck` e `test`; a matrix para Windows e macOS fica para a Fase 10.
+
 **Objetivo:** ter um app Electron + Vue 3 + TS abrindo, com ferramentas de qualidade e estrutura de pastas prontas.
 
 **Tarefas**
@@ -422,6 +467,8 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 1 — Design system e shell do app
 
+**Status:** concluída. Há 18 componentes em `components/`, catálogo na rota `/test` (só em dev) e as 7 cores de grupo em `tokens.css`. O toggle da sidebar entra na Fase 3.
+
 **Objetivo:** implementar o visual do print como biblioteca de componentes e montar o layout principal com dados fictícios.
 
 **Tarefas**
@@ -444,6 +491,8 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 2 — Camada de dados e IPC
 
+**Status:** concluída (migração `001_init.sql`, repositórios, schemas Zod, handlers com `IpcResult`, preload tipado, seed e testes). Resta remover o código legado de arquivar, descrito em "Estado atual do repositório".
+
 **Objetivo:** persistência confiável em SQLite com contrato IPC tipado e validado.
 
 **Tarefas**
@@ -452,7 +501,7 @@ Total aproximado: 6–8 semanas.
 2. Criar `connection.ts` abrindo `userData/habit-tracker.db` com `journal_mode = WAL` e `foreign_keys = ON`.
 3. Criar o runner de migrações: lê `migrations/*.sql` em ordem, aplica em transação e registra em `schema_migrations`.
 4. Escrever `001_init.sql` com as tabelas da seção 6.2.
-5. Implementar repositórios (`groups`, `habits`, `completions`, `settings`) com statements preparados e retorno tipado.
+5. ImpPrlementar repositórios (`groups`, `habits`, `completions`, `settings`) com statements preparados e retorno tipado.
 6. Definir schemas Zod em `shared/schemas.ts` e usar nos handlers IPC.
 7. Registrar handlers por domínio e canais em `ipc-channels.ts`.
 8. Expor `window.api` no preload conforme a seção 4.3, sem expor `ipcRenderer`.
@@ -469,7 +518,9 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 3 — Grupos e hábitos (CRUD)
 
-**Objetivo:** criar, editar, organizar e arquivar grupos e hábitos pela interface.
+**Status:** em andamento. Feito: tarefas 1 a 5 e 12 (stores, sidebar com dados reais, modais de grupo e hábito, validação com Zod e contagem no cabeçalho), mais a edição de hábito pela barra de ações, o toggle da sidebar (com `Ctrl/Cmd+B`) e o tratamento do menu de contexto na sidebar. Faltam reordenar, mover entre grupos, excluir, o estado vazio e a edição de grupo pelo menu de contexto.
+
+**Objetivo:** criar, editar e organizar grupos e hábitos pela interface.
 
 **Tarefas**
 
@@ -480,19 +531,21 @@ Total aproximado: 6–8 semanas.
 5. Validação de formulário com Zod, mensagens em português e foco no primeiro erro.
 6. Reordenar grupos e hábitos por arrastar e soltar (HTML5 nativo, ou `vuedraggable` se o nativo ficar complexo) e persistir `position`.
 7. Mover hábito entre grupos.
-8. Arquivar/restaurar hábito e visualizar arquivados em uma seção recolhida.
+8. Toggle da sidebar (mostrar/ocultar): estado `sidebarOpen` num store `ui`, guardado em `localStorage` dentro de `try/catch`. A ação `toggle-view` da `ActionBar`, que hoje emite o evento sem handler, vira "Mostrar/ocultar sidebar" com o ícone `panel-left` (novo em `icons.ts`). Quando a sidebar está recolhida, um botão fixo na área de conteúdo a reabre. Atalho `Ctrl/Cmd+B` em `useHotkeys`. No `.shell` a coluna da grid anima entre `var(--sidebar-width)` e `0`; a sidebar recolhida recebe `inert` e `aria-hidden`, e a animação respeita `prefers-reduced-motion`.
 9. Excluir grupo e hábito com confirmação explicando o efeito (grupo: hábitos ficam sem grupo; hábito: apaga histórico).
-10. Menu de contexto (botão direito) na sidebar: editar, arquivar, excluir, duplicar.
+10. Menu de contexto (botão direito) na sidebar: editar, excluir, duplicar.
 11. Estado vazio acolhedor quando não há grupos ou hábitos, com ação para criar o primeiro.
 12. Contagem no cabeçalho ("N hábitos, M grupos") atualizada em tempo real.
 
-**Entregáveis:** gestão completa de grupos e hábitos persistida.
+**Entregáveis:** gestão completa de grupos e hábitos persistida, com sidebar que pode ser ocultada.
 
-**Critérios de aceite:** criar → editar → reordenar → arquivar → restaurar → excluir funciona sem recarregar; ordem persiste após reiniciar; testes dos stores passando.
+**Critérios de aceite:** criar → editar → reordenar → excluir funciona sem recarregar; ordem persiste após reiniciar; testes dos stores passando; o toggle oculta e mostra a sidebar com animação e lembra a escolha ao reabrir o app.
 
 **Riscos:** drag and drop com árvore aninhada → limitar a dois níveis (grupo → hábito).
 
 ### Fase 4 — Check-in diário (tela Hoje)
+
+**Status:** não iniciada. Existem só placeholders: `TodayView.vue`, `stores/today.ts`, `useDate.ts` e `useHotkeys.ts`. O `shared/date.ts` já tem `toDateKey` e `addDays`.
 
 **Objetivo:** o fluxo principal: ver o que é devido hoje e marcar em um clique.
 
@@ -512,11 +565,13 @@ Total aproximado: 6–8 semanas.
 
 **Entregáveis:** tela Hoje funcional, check-in persistido.
 
-**Critérios de aceite:** marcar/desmarcar leva um clique e reflete em menos de 100 ms; dia passado editável; `isDue` com testes cobrindo casos de borda (virada de semana, `start_date`, hábito arquivado).
+**Critérios de aceite:** marcar/desmarcar leva um clique e reflete em menos de 100 ms; dia passado editável; `isDue` com testes cobrindo casos de borda (virada de semana, `start_date`).
 
 **Riscos:** erros de data/fuso → testar com `TZ` diferentes no Vitest.
 
 ### Fase 5 — Visões semanal e mensal
+
+**Status:** não iniciada (`WeekView.vue` e `MonthView.vue` são placeholders). O `completions.range` já existe no IPC.
 
 **Objetivo:** enxergar padrões ao longo do tempo em grade e calendário.
 
@@ -540,6 +595,8 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 6 — Estatísticas e streaks
 
+**Status:** não iniciada. `StatsView.vue`, `services/stats.ts`, `ipc/stats.ts` e `useStreaks.ts` são placeholders. Os tipos `HabitStats` e `Overview` e o contrato `window.api.stats` já estão declarados, mas o main ainda não registra os handlers.
+
 **Objetivo:** transformar o histórico em informação motivadora e simples.
 
 **Tarefas**
@@ -562,6 +619,8 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 7 — Configurações, backup e dados
 
+**Status:** não iniciada. `SettingsView.vue`, `stores/settings.ts`, `ipc/data.ts` e `services/backup.ts` são placeholders. O repositório e o IPC de `settings` já funcionam, com `DEFAULT_SETTINGS` em `shared/defaults.ts` (a semana começa no domingo).
+
 **Objetivo:** dar controle e segurança sobre os dados.
 
 **Tarefas**
@@ -583,6 +642,8 @@ Total aproximado: 6–8 semanas.
 **Riscos:** versão futura do esquema → incluir `version` no JSON e função de migração do import.
 
 ### Fase 8 — Integração com o desktop
+
+**Status:** não iniciada (`services/tray.ts` e `services/notifications.ts` são placeholders).
 
 **Objetivo:** fazer o app se comportar como um app desktop de verdade.
 
@@ -607,6 +668,8 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 9 — Qualidade, acessibilidade e performance
 
+**Status:** parcial. Há 7 arquivos de teste (shared, main e renderer) rodando no CI; os do main usam o Electron como Node (`ELECTRON_RUN_AS_NODE`). Faltam Playwright (e2e), auditoria de acessibilidade, `electron-log` e testes de componentes.
+
 **Objetivo:** estabilizar, polir e proteger contra regressões.
 
 **Tarefas**
@@ -629,6 +692,8 @@ Total aproximado: 6–8 semanas.
 **Riscos:** e2e instável → usar seletores por `data-testid` e esperas explícitas por estado.
 
 ### Fase 10 — Empacotamento e lançamento
+
+**Status:** não iniciada. O `electron-builder.yml` ainda tem os valores do template: `appId` `com.electron.app`, `publish` apontando para example.com, textos de permissão de câmera e microfone no macOS, espelho de download e alvo `snap`. Ajustar nesta fase.
 
 **Objetivo:** gerar instaladores e publicar a primeira versão.
 

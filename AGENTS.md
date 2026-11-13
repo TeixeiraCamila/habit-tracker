@@ -12,8 +12,8 @@ usuária; não há conta, servidor ou nuvem.
 
 Stack prevista pelo planejamento: Vue 3 (Composition API, `<script setup>`), Pinia, Vue Router
 (hash mode), SQLite via better-sqlite3, Zod, date-fns, lucide-vue-next, Vitest e Playwright.
-A Fase 0 está concluída com Electron, Vue, TypeScript, Pinia, Vue Router, Vitest e CI; as
-dependências de dados entram nas próximas fases.
+As Fases 0 e 2 estão concluídas com design system, shell do app e persistência/IPC; a Fase 3 está em
+andamento.
 
 ## Comandos
 
@@ -62,9 +62,10 @@ recursos do empacotamento; `resources/` contém recursos usados em runtime.
 
 ### Estado atual
 
-A Fase 0 está concluída: Electron + Vue 3 + TS, Pinia, Vue Router, Vitest e CI. Os demais arquivos
-da estrutura continuam como placeholders e devem ser preenchidos conforme as fases do planejamento,
-sem criar uma organização paralela.
+As Fases 0 e 2 estão concluídas (design system, shell do app e camada de dados/IPC) e a Fase 3 está
+em andamento (stores, sidebar com dados reais, modais de grupo e hábito com validação, edição de
+hábito pela barra de ações). Os demais arquivos da estrutura continuam como placeholders e devem
+ser preenchidos conforme as fases do planejamento, sem criar uma organização paralela.
 
 ## Arquitetura e regras
 
@@ -80,7 +81,7 @@ sem criar uma organização paralela.
 - **Datas são strings locais `YYYY-MM-DD`**, não instantes. Isso evita bugs de fuso e horário de
   verão. A virada do dia respeita a configuração `dayStartsAt`.
 - **Streaks e estatísticas são calculados**, nunca armazenados.
-- **Arquivar em vez de apagar** hábitos; exclusão definitiva exige confirmação explícita.
+- **Excluir** hábitos com confirmação explícita; o plano não prevê arquivamento.
 - **Um check-in por (hábito, dia)**; a coluna `value` cobre hábitos do tipo contador.
 - **Segurança do Electron:** `contextIsolation` ligado, `nodeIntegration` desligado, CSP no
   `index.html`, navegação externa e `window.open` bloqueados.

@@ -1,10 +1,10 @@
 {
   "name": "habit-tracker",
   "version": "1.0.0",
-  "description": "An Electron application with Vue and TypeScript",
+  "description": "Aplicativo desktop local-first para acompanhar hábitos diários",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "Camila Teixeira",
+  "homepage": "https://github.com/TeixeiraCamila/habit-tracker",
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -1,6 +1,6 @@
 # Configuração do electron-builder: gera os instaladores (Windows, macOS, Linux)
 # e define o que entra no pacote da aplicação.
-appId: com.electron.app
+appId: com.habittracker.app
 productName: habit-tracker
 directories:
   buildResources: build
@@ -42,6 +42,6 @@ appImage:
 npmRebuild: false
 publish:
   provider: generic
-  url: https://example.com/auto-updates
+  url: https://github.com/TeixeiraCamila/habit-tracker/releases/latest
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

@@ -3,8 +3,8 @@
 Aplicativo desktop **local-first** para acompanhar hábitos diários, sequências (streaks) e
 progresso. Tudo fica no próprio computador: sem conta, servidor ou nuvem.
 
-> **Status:** Fase 0 concluída: Electron + Vue 3 + TypeScript, Pinia, Vue Router, Vitest e CI.
-> Persistência, telas e demais recursos entram conforme o
+> **Status:** Fases 0 e 2 concluídas (design system, shell do app e camada de dados/IPC) e Fase 3
+> em andamento (CRUD de grupos e hábitos). As telas e demais recursos entram conforme o
 > [planejamento](docs/Habit%20Tracker%20%E2%80%94%20Planejamento.md).
 
 ## Stack
@@ -14,7 +14,7 @@ progresso. Tudo fica no próprio computador: sem conta, servidor ou nuvem.
 - **Estado e rotas:** Pinia + Vue Router (hash mode)
 - **Qualidade:** ESLint, Prettier, `vue-tsc` e Vitest
 - **CI:** GitHub Actions
-- **Planejado:** SQLite (better-sqlite3), Zod, date-fns e lucide-vue-next
+- **Dados:** SQLite (better-sqlite3), Zod, lucide-vue-next; datas em strings `YYYY-MM-DD`
 
 ## Requisitos
 
