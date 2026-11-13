@@ -321,10 +321,12 @@ async function deleteHabit(): Promise<void> {
       >
         Excluir hábito
       </button>
-      <button type="button" class="btn" @click="emit('close')">Cancelar</button>
-      <button type="submit" form="habit-form" class="btn btn-primary" :disabled="saving">
-        Salvar
-      </button>
+      <div>
+        <button type="button" class="btn" @click="emit('close')">Cancelar</button>
+        <button type="submit" form="habit-form" class="btn btn-primary" :disabled="saving">
+          Salvar
+        </button>
+      </div>
     </template>
   </Modal>
 </template>
@@ -344,5 +346,20 @@ async function deleteHabit(): Promise<void> {
 
 .btn-danger {
   font-weight: 700;
+}
+footer div {
+  display: flex;
+  gap: var(--space-2);
+}
+footer button {
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  min-height: var(--row-height);
+  padding: 0 var(--space-4);
+}
+footer button:hover {
+  background: var(--surface);
+  border-color: var(--surface-border);
+  box-shadow: var(--shadow);
 }
 </style>

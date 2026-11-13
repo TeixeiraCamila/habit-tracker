@@ -140,7 +140,7 @@ onBeforeUnmount(() => {
 .modal__footer {
   display: flex;
   gap: var(--space-2);
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-top: var(--space-6);
 }
 </style>
