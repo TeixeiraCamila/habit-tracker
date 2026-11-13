@@ -20,10 +20,9 @@ const api: Api = {
     reorder: (ids) => call(IPC.groups.reorder, ids)
   },
   habits: {
-    list: (opts) => call(IPC.habits.list, opts),
+    list: () => call(IPC.habits.list),
     create: (h) => call(IPC.habits.create, h),
     update: (id, patch) => call(IPC.habits.update, id, patch),
-    archive: (id, archived) => call(IPC.habits.archive, id, archived),
     remove: (id) => call(IPC.habits.remove, id),
     reorder: (groupId, ids) => call(IPC.habits.reorder, groupId, ids)
   },

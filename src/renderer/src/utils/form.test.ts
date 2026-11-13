@@ -5,7 +5,7 @@ import { toFieldErrors } from './form'
 const base = {
   groupId: null,
   name: 'Água',
-  icon: 'Droplets',
+  icon: 'droplets',
   kind: 'boolean',
   target: 1,
   freqType: 'daily',

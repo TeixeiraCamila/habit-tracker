@@ -9,15 +9,10 @@ import { z } from 'zod'
 export function registerHabitsIpc(db: Db): void {
   const repo = habitsRepo(db)
 
-  handle(IPC.habits.list, (opts) =>
-    repo.list(z.object({ archived: z.boolean().optional() }).optional().parse(opts))
-  )
+  handle(IPC.habits.list, () => repo.list())
   handle(IPC.habits.create, (h) => repo.create(newHabitSchema.parse(h)))
   handle(IPC.habits.update, (id, patch) =>
     repo.update(idSchema.parse(id), habitPatchSchema.parse(patch))
-  )
-  handle(IPC.habits.archive, (id, archived) =>
-    repo.archive(idSchema.parse(id), z.boolean().parse(archived))
   )
   handle(IPC.habits.remove, (id) => repo.remove(idSchema.parse(id)))
   handle(IPC.habits.reorder, (groupId, ids) =>

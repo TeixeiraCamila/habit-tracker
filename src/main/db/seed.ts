@@ -35,41 +35,41 @@ const data: {
   habits: SeedHabit[]
 }[] = [
   {
-    group: { name: 'Manhã', color: 'orange', icon: 'Sunrise' },
+    group: { name: 'Manhã', color: 'orange', icon: 'sunrise' },
     habits: [
       {
         name: 'Beber água',
-        icon: 'Droplets',
+        icon: 'droplets',
         rate: 0.8,
         kind: 'counter',
         target: 8,
         unit: 'copos',
         freqType: 'daily'
       },
-      daily('Alongar', 'Activity', 0.6)
+      daily('Alongar', 'activity', 0.6)
     ]
   },
   {
-    group: { name: 'Estudo', color: 'yellow', icon: 'BookMarked' },
+    group: { name: 'Estudo', color: 'yellow', icon: 'book-marked' },
     habits: [
       {
         name: 'Inglês',
-        icon: 'Languages',
+        icon: 'languages',
         rate: 0.7,
         kind: 'boolean',
         target: 1,
         freqType: 'weekdays',
         freqDays: [1, 2, 3, 4, 5]
       },
-      daily('Ler 20 páginas', 'BookOpen', 0.55)
+      daily('Ler 20 páginas', 'book-open', 0.55)
     ]
   },
   {
-    group: { name: 'Corpo', color: 'green', icon: 'Dumbbell' },
+    group: { name: 'Corpo', color: 'green', icon: 'dumbbell' },
     habits: [
       {
         name: 'Treinar',
-        icon: 'Dumbbell',
+        icon: 'dumbbell',
         rate: 0.5,
         kind: 'boolean',
         target: 1,
@@ -80,10 +80,10 @@ const data: {
     ]
   },
   {
-    group: { name: 'Mente', color: 'red', icon: 'Heart' },
-    habits: [daily('Meditar', 'Brain', 0.65), daily('Diário', 'NotebookPen', 0.4)]
+    group: { name: 'Mente', color: 'red', icon: 'heart' },
+    habits: [daily('Meditar', 'brain', 0.65), daily('Diário', 'notebook-pen', 0.4)]
   },
-  { group: null, habits: [daily('Tomar vitaminas', 'Circle', 0.9)] }
+  { group: null, habits: [daily('Tomar vitaminas', 'circle', 0.9)] }
 ]
 
 // Devolve false (sem mexer em nada) se o banco já tem grupos.

@@ -10,7 +10,7 @@ import type { NewHabit } from '@shared/types'
 const newHabit = (over: Partial<NewHabit> = {}): NewHabit => ({
   groupId: null,
   name: 'Beber água',
-  icon: 'Droplets',
+  icon: 'droplets',
   kind: 'boolean',
   target: 1,
   freqType: 'daily',
@@ -27,8 +27,8 @@ beforeEach(() => {
 describe('groups', () => {
   it('cria, ordena e reordena', () => {
     const repo = groupsRepo(db)
-    const a = repo.create({ name: 'A', color: 'orange', icon: 'Sunrise' })
-    const b = repo.create({ name: 'B', color: 'green', icon: 'Dumbbell' })
+    const a = repo.create({ name: 'A', color: 'orange', icon: 'sunrise' })
+    const b = repo.create({ name: 'B', color: 'green', icon: 'dumbbell' })
     expect(repo.list().map((g) => g.name)).toEqual(['A', 'B'])
     repo.reorder([b.id, a.id])
     expect(repo.list().map((g) => g.name)).toEqual(['B', 'A'])
@@ -42,23 +42,13 @@ describe('habits', () => {
     expect(repo.get(h.id).freqDays).toEqual([1, 3, 5])
   })
 
-  it('arquiva e restaura', () => {
-    const repo = habitsRepo(db)
-    const h = repo.create(newHabit())
-    repo.archive(h.id, true)
-    expect(repo.list()).toHaveLength(0)
-    expect(repo.list({ archived: true })).toHaveLength(1)
-    repo.archive(h.id, false)
-    expect(repo.list()).toHaveLength(1)
-  })
-
   it('atualiza só os campos enviados', () => {
     const repo = habitsRepo(db)
     const h = repo.create(newHabit())
     const u = repo.update(h.id, { name: 'Água', target: 8 })
     expect(u.name).toBe('Água')
     expect(u.target).toBe(8)
-    expect(u.icon).toBe('Droplets')
+    expect(u.icon).toBe('droplets')
   })
 })
 

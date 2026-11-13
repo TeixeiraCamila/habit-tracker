@@ -10,7 +10,6 @@ export const useHabitsStore = defineStore('habits', () => {
 
   async function load(): Promise<void> {
     items.value = await api.habits.list()
-    console.log('🚀 ~ load ~ items.value:', items.value)
   }
 
   async function create(h: NewHabit): Promise<Habit> {
@@ -25,15 +24,10 @@ export const useHabitsStore = defineStore('habits', () => {
     return updated
   }
 
-  async function archive(id: number, archived: boolean): Promise<void> {
-    await api.habits.archive(id, archived)
-    await load()
-  }
-
   async function remove(id: number): Promise<void> {
     await api.habits.remove(id)
     items.value = items.value.filter((h) => h.id !== id)
   }
 
-  return { items, selectedHabitId, load, create, update, archive, remove }
+  return { items, selectedHabitId, load, create, update, remove }
 })

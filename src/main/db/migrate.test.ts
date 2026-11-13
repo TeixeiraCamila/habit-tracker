@@ -26,9 +26,9 @@ describe('migrate', () => {
   it('aplica o ON DELETE SET NULL ao apagar um grupo', () => {
     const db = openDb(':memory:')
     migrate(db)
-    db.prepare("INSERT INTO groups (name, color, icon) VALUES ('Manhã', 'orange', 'Sunrise')").run()
+    db.prepare("INSERT INTO groups (name, color, icon) VALUES ('Manhã', 'orange', 'sunrise')").run()
     db.prepare(
-      "INSERT INTO habits (group_id, name, icon, start_date) VALUES (1, 'Água', 'Droplets', '2026-11-04')"
+      "INSERT INTO habits (group_id, name, icon, start_date) VALUES (1, 'Água', 'droplets', '2026-11-04')"
     ).run()
     db.prepare('DELETE FROM groups WHERE id = 1').run()
     const h = db.prepare('SELECT group_id FROM habits').get() as { group_id: number | null }

@@ -11,7 +11,6 @@ export const IPC = {
     list: 'habits.list',
     create: 'habits.create',
     update: 'habits.update',
-    archive: 'habits.archive',
     remove: 'habits.remove',
     reorder: 'habits.reorder'
   },

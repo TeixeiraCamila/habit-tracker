@@ -24,7 +24,6 @@ CREATE TABLE habits (
   freq_times    INTEGER,
   reminder_time TEXT,
   start_date    TEXT NOT NULL,
-  archived_at   TEXT,
   position      INTEGER NOT NULL DEFAULT 0,
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );

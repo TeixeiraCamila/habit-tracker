@@ -29,11 +29,10 @@ export interface Habit {
   freqTimes?: number
   reminderTime?: string
   startDate: string
-  archivedAt?: string
   position: number
 }
 
-export type NewHabit = Omit<Habit, 'id' | 'position' | 'archivedAt'>
+export type NewHabit = Omit<Habit, 'id' | 'position'>
 
 export interface Completion {
   id: number

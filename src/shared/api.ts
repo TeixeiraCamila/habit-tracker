@@ -19,10 +19,9 @@ export interface Api {
     reorder(ids: number[]): Promise<void>
   }
   habits: {
-    list(opts?: { archived?: boolean }): Promise<Habit[]>
+    list(): Promise<Habit[]>
     create(h: NewHabit): Promise<Habit>
     update(id: number, h: Partial<Habit>): Promise<Habit>
-    archive(id: number, archived: boolean): Promise<void>
     remove(id: number): Promise<void>
     reorder(groupId: number | null, ids: number[]): Promise<void>
   }

@@ -16,7 +16,6 @@ interface HabitRow {
   freq_times: number | null
   reminder_time: string | null
   start_date: string
-  archived_at: string | null
   position: number
 }
 
@@ -34,7 +33,6 @@ const toHabit = (r: HabitRow): Habit => ({
   freqTimes: r.freq_times ?? undefined,
   reminderTime: r.reminder_time ?? undefined,
   startDate: r.start_date,
-  archivedAt: r.archived_at ?? undefined,
   position: r.position
 })
 
@@ -55,11 +53,10 @@ const FIELDS: Record<string, [column: string, convert?: (v: unknown) => unknown]
 }
 
 interface HabitsRepo {
-  list(opts?: { archived?: boolean }): Habit[]
+  list(): Habit[]
   get: (id: number) => Habit
   create(h: NewHabit): Habit
   update(id: number, patch: Partial<NewHabit>): Habit
-  archive(id: number, archived: boolean): void
   remove(id: number): void
   reorder(groupId: number | null, ids: number[]): void
 }
@@ -69,10 +66,9 @@ export function habitsRepo(db: Db): HabitsRepo {
     toHabit(db.prepare('SELECT * FROM habits WHERE id = ?').get(id) as HabitRow)
 
   return {
-    list(opts?: { archived?: boolean }): Habit[] {
-      const where = opts?.archived ? 'archived_at IS NOT NULL' : 'archived_at IS NULL'
+    list(): Habit[] {
       const rows = db
-        .prepare(`SELECT * FROM habits WHERE ${where} ORDER BY group_id, position, id`)
+        .prepare('SELECT * FROM habits ORDER BY group_id, position, id')
         .all() as HabitRow[]
       return rows.map(toHabit)
     },
@@ -121,14 +117,6 @@ export function habitsRepo(db: Db): HabitsRepo {
         db.prepare(`UPDATE habits SET ${sets.join(', ')} WHERE id = ?`).run(...values, id)
       }
       return get(id)
-    },
-
-    archive(id: number, archived: boolean): void {
-      db.prepare(
-        archived
-          ? "UPDATE habits SET archived_at = datetime('now') WHERE id = ?"
-          : 'UPDATE habits SET archived_at = NULL WHERE id = ?'
-      ).run(id)
     },
 
     remove(id: number): void {

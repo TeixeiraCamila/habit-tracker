@@ -19,7 +19,7 @@ const name = z
   .string({ error: 'Informe um nome' })
   .trim()
   .min(1, 'Informe um nome')
-  .max(60, 'Uso no máximo de 60 caracteres')
+  .max(60, 'Use no máximo 60 caracteres')
 const icon = z.string().min(1, 'Escolha um ícone').max(40)
 
 export const newGroupSchema = z.object({
@@ -53,7 +53,6 @@ const habitBase = z.object({
     .array(z.number().int().min(0).max(6))
     .min(1, 'Escolha ao menos um dia')
     .max(7)
-    .optional()
     .optional(),
   freqTimes: z
     .number({ error: 'Informe quantas vezes por semana' })
