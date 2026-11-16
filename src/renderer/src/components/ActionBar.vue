@@ -16,7 +16,6 @@ const emit = defineEmits<{
   'new-habit': []
   'new-group': []
   sort: []
-  'toggle-view': []
   'collapse-all': []
   'edit-habit': [habit: Habit]
 }>()
@@ -42,9 +41,6 @@ function run(action: ActionItem): void {
       break
     case 'sort':
       emit('sort')
-      break
-    case 'toggle-view':
-      emit('toggle-view')
       break
     case 'collapse-all':
       emit('collapse-all')

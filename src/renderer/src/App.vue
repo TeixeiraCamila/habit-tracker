@@ -6,7 +6,6 @@ import AppHeader from '@renderer/components/AppHeader.vue'
 import ViewSwitcher from '@renderer/components/ViewSwitcher.vue'
 import SidebarTree from '@renderer/components/SidebarTree.vue'
 import ActionBar from '@renderer/components/ActionBar.vue'
-import IconButton from '@renderer/components/IconButton.vue'
 import Toast from '@renderer/components/Toast.vue'
 import { useGroupsStore } from '@renderer/stores/groups'
 import { useHabitsStore } from '@renderer/stores/habits'
@@ -15,9 +14,13 @@ import { useTree } from '@renderer/composables/useTree'
 import { useToast } from '@renderer/composables/useToast'
 import { useHotkeys } from '@renderer/composables/useHotkeys'
 import { errorMessage } from '@renderer/utils/errors'
-import { Group, Habit } from '@shared/types'
 import GroupFormModal from './components/GroupFormModal.vue'
 import HabitFormModal from './components/HabitFormModal.vue'
+import EmptyState from './components/EmptyState.vue'
+
+import ContextMenu from '@renderer/components/ContextMenu.vue'
+import type { MenuItem } from '@renderer/types/menu'
+import type { Group, Habit } from '@shared/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,6 +30,10 @@ const ui = useUiStore()
 const { treeGroups, ungrouped } = useTree()
 const { toast, error, dismiss } = useToast()
 useHotkeys()
+const loaded = ref(false)
+const isEmpty = computed(
+  () => loaded.value && groupsStore.items.length === 0 && habitsStore.items.length === 0
+)
 
 const sidebarOpen = computed({
   get: (): boolean => ui.sidebarOpen,
@@ -61,19 +68,80 @@ function openGroupForm(group: Group | null = null): void {
   groupForm.group = group
 }
 
+async function run(task: () => Promise<unknown>): Promise<void> {
+  try {
+    await task()
+  } catch (e) {
+    error(errorMessage(e))
+  }
+}
+
+const menu = reactive<{ open: boolean; x: number; y: number; kind: 'group' | 'habit'; id: number }>(
+  { open: false, x: 0, y: 0, kind: 'habit', id: 0 }
+)
+
+const menuItems = computed<MenuItem[]>(() =>
+  menu.kind === 'group'
+    ? [
+        { key: 'edit', label: 'Editar grupo' },
+        { key: 'delete', label: 'Excluir grupo', danger: true }
+      ]
+    : [
+        { key: 'edit', label: 'Editar hábito' },
+        { key: 'duplicate', label: 'Duplicar hábito' },
+        { key: 'delete', label: 'Excluir hábito', danger: true }
+      ]
+)
+
 function handleContextMenu(payload: {
   kind: 'group' | 'habit'
   id: number
   event: MouseEvent
 }): void {
-  const { kind, id } = payload
-  if (kind === 'group') {
-    openGroupForm(groupsStore.items.find((g) => g.id === id) ?? null)
-    return
-  }
-  openHabitForm(habitsStore.items.find((h) => h.id === id) ?? null)
+  Object.assign(menu, {
+    open: true,
+    x: payload.event.clientX,
+    y: payload.event.clientY,
+    kind: payload.kind,
+    id: payload.id
+  })
 }
 
+function removeGroup(group: Group): Promise<void> {
+  if (!window.confirm(`Excluir o grupo "${group.name}"? Os hábitos dele ficam sem grupo.`)) {
+    return Promise.resolve()
+  }
+  return run(() => groupsStore.remove(group.id))
+}
+
+function removeHabit(habit: Habit): Promise<void> {
+  if (!window.confirm(`Excluir o hábito "${habit.name}"? O histórico dele também será apagado.`)) {
+    return Promise.resolve()
+  }
+  if (selectedHabitId.value === habit.id) selectedHabitId.value = null
+  return run(() => habitsStore.remove(habit.id))
+}
+
+function duplicateHabit(habit: Habit): Promise<void> {
+  const copy = { ...habit, name: `${habit.name.slice(0, 52)} (cópia)` }
+  return run(() => habitsStore.create(copy))
+}
+
+function handleMenuSelect(key: string): void {
+  menu.open = false
+  if (menu.kind === 'group') {
+    const group = groupsStore.items.find((g) => g.id === menu.id)
+    if (!group) return
+    if (key === 'edit') openGroupForm(group)
+    if (key === 'delete') void removeGroup(group)
+    return
+  }
+  const habit = habitsStore.items.find((h) => h.id === menu.id)
+  if (!habit) return
+  if (key === 'edit') openHabitForm(habit)
+  if (key === 'duplicate') void duplicateHabit(habit)
+  if (key === 'delete') void removeHabit(habit)
+}
 function handleSelectHabit(id: number, selected: boolean): void {
   selectedHabitId.value = selected ? id : null
 }
@@ -85,10 +153,6 @@ const view = computed({
 
 function toggleSidebar(): void {
   sidebarOpen.value = !sidebarOpen.value
-}
-
-function openSidebar(): void {
-  sidebarOpen.value = true
 }
 
 function handleSort(): void {
@@ -103,6 +167,8 @@ onMounted(async () => {
     await Promise.all([groupsStore.load(), habitsStore.load()])
   } catch (e) {
     error(errorMessage(e))
+  } finally {
+    loaded.value = true
   }
 })
 </script>
@@ -115,13 +181,22 @@ onMounted(async () => {
         :habit-count="habitsStore.items.length"
         :group-count="groupsStore.items.length"
         @open-settings="router.push({ name: 'settings' })"
-        @open-dev="router.push({ name: 'test' })"
+        @toggle-sidebar="toggleSidebar"
       />
       <div class="switcher">
         <ViewSwitcher v-model="view" :options="views" />
       </div>
       <div class="tree-scroll">
+        <EmptyState
+          v-if="isEmpty"
+          icon="folder-plus"
+          title="Nenhum hábito ainda"
+          description="Cria um grupo para organizar seus hábitos"
+          action-label="Criar hábito"
+          @action="openGroupForm()"
+        />
         <SidebarTree
+          v-else
           ref="tree"
           :groups="treeGroups"
           :ungrouped="ungrouped"
@@ -136,20 +211,11 @@ onMounted(async () => {
         @new-group="openGroupForm()"
         @edit-habit="openHabitForm"
         @sort="handleSort"
-        @toggle-view="toggleSidebar"
         @collapse-all="tree?.collapseAll()"
       />
     </aside>
 
     <main class="content">
-      <IconButton
-        v-if="!sidebarOpen"
-        class="content-sidebar-toggle"
-        icon="panel-left"
-        label="Mostrar sidebar"
-        @click="openSidebar"
-      />
-
       <RouterView />
     </main>
 
@@ -159,6 +225,15 @@ onMounted(async () => {
       :message="toast.message"
       :kind="toast.kind"
       @dismiss="dismiss"
+    />
+
+    <ContextMenu
+      :open="menu.open"
+      :x="menu.x"
+      :y="menu.y"
+      :items="menuItems"
+      @select="handleMenuSelect"
+      @close="menu.open = false"
     />
 
     <HabitFormModal
@@ -213,11 +288,5 @@ onMounted(async () => {
   overflow-y: auto;
   padding: var(--space-6);
   background: var(--surface);
-}
-
-.content-sidebar-toggle {
-  position: fixed;
-  left: var(--space-6);
-  bottom: var(--space-6);
 }
 </style>

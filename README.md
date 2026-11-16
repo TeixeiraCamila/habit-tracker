@@ -40,6 +40,16 @@ npm run dev
 O `dev` sobe o Vite e abre a janela do Electron com HMR no renderer. Alterações em `src/renderer`
 recarregam na hora; mudanças em `src/main` e `src/preload` são recompiladas e reiniciam o app.
 
+## Design system
+
+Em desenvolvimento, a rota `/test` do router abre o catálogo de componentes da Fase 1:
+
+```bash
+npm run dev
+```
+
+Depois, acesse a URL `http://localhost:5173/#/test` no app em desenvolvimento (hash `#/test`).
+
 ## Como buildar
 
 O build de produção roda o typecheck antes de compilar main, preload e renderer:

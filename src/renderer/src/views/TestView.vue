@@ -231,7 +231,6 @@ function handleSelectHabit(id: number, selected: boolean): void {
           @new-habit="selectAction('new-habit', 'Novo hábito')"
           @new-group="selectAction('new-group', 'Novo grupo')"
           @sort="selectAction('sort', 'Ordenar')"
-          @toggle-view="selectAction('toggle-view', 'Alternar visão')"
           @collapse-all="selectAction('collapse-all', 'Recolher tudo')"
           @edit-habit="selectAction('edit-habit', 'Editar hábito')"
         />

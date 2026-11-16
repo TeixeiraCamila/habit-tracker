@@ -8,15 +8,16 @@ const props = defineProps<{
   groupCount: number
 }>()
 
-const emit = defineEmits<{ 'open-settings': []; 'open-dev': [] }>()
+const emit = defineEmits<{
+  'open-settings': []
+  'toggle-sidebar': []
+}>()
 
 const subtitle = computed(() => {
   const habits = `${props.habitCount} ${props.habitCount === 1 ? 'hábito' : 'hábitos'}`
   const groups = `${props.groupCount} ${props.groupCount === 1 ? 'grupo' : 'grupos'}`
   return `${habits}, ${groups}`
 })
-
-const IS_DEV = import.meta.env.DEV
 </script>
 
 <template>
@@ -28,8 +29,8 @@ const IS_DEV = import.meta.env.DEV
       <p class="app-header__subtitle">{{ subtitle }}</p>
     </div>
 
+    <IconButton icon="panel-left" label="Mostrar/ocultar sidebar" @click="emit('toggle-sidebar')" />
     <IconButton icon="settings" label="Configurações" @click="emit('open-settings')" />
-    <IconButton v-if="IS_DEV" icon="settings" label="DEV" @click="emit('open-dev')" />
   </header>
 </template>
 
