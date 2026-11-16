@@ -9,10 +9,8 @@ import ActionBar from '@renderer/components/ActionBar.vue'
 import Toast from '@renderer/components/Toast.vue'
 import { useGroupsStore } from '@renderer/stores/groups'
 import { useHabitsStore } from '@renderer/stores/habits'
-import { useUiStore } from '@renderer/stores/ui'
 import { useTree } from '@renderer/composables/useTree'
 import { useToast } from '@renderer/composables/useToast'
-import { useHotkeys } from '@renderer/composables/useHotkeys'
 import { errorMessage } from '@renderer/utils/errors'
 import GroupFormModal from './components/GroupFormModal.vue'
 import HabitFormModal from './components/HabitFormModal.vue'
@@ -26,19 +24,12 @@ const route = useRoute()
 const router = useRouter()
 const groupsStore = useGroupsStore()
 const habitsStore = useHabitsStore()
-const ui = useUiStore()
 const { treeGroups, ungrouped } = useTree()
 const { toast, error, dismiss } = useToast()
-useHotkeys()
 const loaded = ref(false)
 const isEmpty = computed(
   () => loaded.value && groupsStore.items.length === 0 && habitsStore.items.length === 0
 )
-
-const sidebarOpen = computed({
-  get: (): boolean => ui.sidebarOpen,
-  set: (open: boolean): void => ui.setOpen(open)
-})
 
 const selectedHabitId = ref<number | null>(null)
 const tree = ref<InstanceType<typeof SidebarTree> | null>(null)
@@ -151,10 +142,6 @@ const view = computed({
   set: (name: string) => router.push({ name })
 })
 
-function toggleSidebar(): void {
-  sidebarOpen.value = !sidebarOpen.value
-}
-
 function handleSort(): void {
   // Reordenação por arrastar e soltar entra na Fase 3; a ação já tem handler no shell.
 }
@@ -174,14 +161,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="shell" :class="{ 'shell--collapsed': !sidebarOpen }">
-    <aside class="sidebar" :inert="!sidebarOpen" :aria-hidden="!sidebarOpen">
+  <div class="shell">
+    <aside class="sidebar">
       <AppHeader
         title="habits"
         :habit-count="habitsStore.items.length"
         :group-count="groupsStore.items.length"
         @open-settings="router.push({ name: 'settings' })"
-        @toggle-sidebar="toggleSidebar"
       />
       <div class="switcher">
         <ViewSwitcher v-model="view" :options="views" />
@@ -255,11 +241,6 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
   height: 100%;
-  transition: grid-template-columns var(--motion-base) var(--ease-out);
-}
-
-.shell--collapsed {
-  grid-template-columns: 0px 1fr;
 }
 
 .sidebar {

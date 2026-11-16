@@ -10,7 +10,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'open-settings': []
-  'toggle-sidebar': []
 }>()
 
 const subtitle = computed(() => {
@@ -29,7 +28,6 @@ const subtitle = computed(() => {
       <p class="app-header__subtitle">{{ subtitle }}</p>
     </div>
 
-    <IconButton icon="panel-left" label="Mostrar/ocultar sidebar" @click="emit('toggle-sidebar')" />
     <IconButton icon="settings" label="Configurações" @click="emit('open-settings')" />
   </header>
 </template>
