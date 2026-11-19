@@ -58,12 +58,15 @@ const emit = defineEmits<{ action: [] }>()
   font-size: var(--text-sm);
   color: var(--text-title);
   background: var(--surface);
+  transition: border-color var(--motion-fast) var(--ease-out);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-md);
-  transition: border-color var(--motion-fast) var(--ease-out);
+  box-shadow: var(--shadow);
 }
 
 .empty-state__action:hover {
-  border-color: var(--text-muted);
+  box-shadow:
+    0 2px 0 rgba(111, 94, 77, 0.55),
+    0 1px 4px rgba(111, 94, 77, 0.55);
 }
 </style>
