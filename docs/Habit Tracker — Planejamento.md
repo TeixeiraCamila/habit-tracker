@@ -2,33 +2,6 @@
 
 App desktop pessoal para acompanhar hábitos diários · Vue 3 + TypeScript + Vite + Electron
 
-## Estado atual do repositório
-
-Análise de `github.com/TeixeiraCamila/habit-tracker` (branch `main`). O plano abaixo reflete o que já está implementado.
-
-| Fase   | Status        | O que existe no código                                                                                                                                                                            |
-| ------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0      | Concluída     | electron-vite, Vue 3 + TypeScript, Pinia, Vue Router (hash), ESLint, Prettier, `vue-tsc`, Vitest e CI; segurança do Electron (sandbox, CSP, navegação bloqueada); aliases `@shared` e `@renderer` |
-| 1      | Concluída     | `tokens.css` com 7 cores de grupo e contraste AA, Courier Prime, `base.css`, 18 componentes, sidebar e layout, catálogo em `/test` (só em dev)                                                    |
-| 2      | Concluída     | `better-sqlite3`, migração `001_init.sql`, repositórios, schemas Zod, IPC com `IpcResult`, preload tipado, seed (`npm run dev:seed`) e testes                                                     |
-| 3      | Em andamento  | stores, sidebar com dados reais, modais de grupo e hábito com validação, edição de hábito pela barra de ações                                                                                     |
-| 4 a 10 | Não iniciadas | só existem arquivos placeholders (views, stores `today` e `settings`, serviços e handlers de estatísticas e dados)                                                                                |
-
-**Pendências conhecidas no código**
-
-- Nenhuma pendência está aberta no momento; todas foram resolvidas:
-
-  1. O `remove` do store de hábitos passa a chamar `api.habits.remove` e limpar a lista local.
-  2. O `App.vue` trata o `context-menu` da `SidebarTree`, abrindo o formulário de edição (grupo ou hábito).
-  3. As ações `sort` e `toggle-view` da `ActionBar` ganharam handler no shell; `toggle-view` vira o toggle da sidebar.
-  4. O seed passou a usar ícones no formato kebab-case (`sunrise`), alinhado ao mapa de `icons.ts`.
-  5. Código legado de arquivar hábitos removido (coluna `archived_at`, IPC, preload, `Api`, store, tipo e teste).
-  6. `schemas.ts` sem `.optional()` duplicado e mensagem de nome corrigida para "Use no máximo 60 caracteres".
-  7. Removido o `console.log` de depuração de `habits.load`.
-  8. `package.json`, `electron-builder.yml` e `setAppUserModelId` com valores da aplicação (`com.habittracker.app`, descrição e autor do projeto).
-
-- `README.md` e `AGENTS.md` atualizados para refletir os estados de fase e a regra de exclusão.
-
 ## 1. Visão geral
 
 Um aplicativo desktop, local-first e offline, para registrar hábitos diários, acompanhar sequências (streaks) e visualizar progresso. Sem conta, sem servidor, sem nuvem: os dados ficam em um arquivo SQLite na máquina da usuária.
@@ -50,7 +23,6 @@ Um aplicativo desktop, local-first e offline, para registrar hábitos diários, 
 - Visão semanal e mensal (calendário de hábitos).
 - Streak atual, maior streak e taxa de conclusão.
 - Heatmap anual por hábito.
-- Sidebar com toggle para mostrar/ocultar, com atalho `Ctrl/Cmd+B`.
 - Notas opcionais por check-in.
 - Exportar/importar dados (JSON) e backup do banco.
 - Notificações de lembrete e ícone na bandeja.
@@ -64,14 +36,7 @@ Um aplicativo desktop, local-first e offline, para registrar hábitos diários, 
 - App mobile.
 - IA/recomendações.
 
-### 2.3 Ideias para depois do MVP
-
-- Sincronização via arquivo em pasta (Dropbox/Drive) ou export automático.
-- Atalho global de check-in rápido.
-- Tags e filtros avançados.
-- Hábitos com horário e lembretes múltiplos.
-
-### 2.4 Requisitos não funcionais
+### 2.3 Requisitos não funcionais
 
 - Abrir em menos de 2 s; interação instantânea (consultas locais).
 - Zero perda de dados: escrita transacional e backup automático.
@@ -140,8 +105,7 @@ habit-tracker/
 │  │  │  ├─ seed.ts          # dados de desenvolvimento
 │  │  │  └─ migrations/001_init.sql
 │  │  ├─ repositories/       # groups, habits, completions, settings
-│  │  ├─ ipc/                # handle.ts, errors.ts e um handler por domínio
-│  │  └─ services/           # stats, backup, notifications, tray (placeholders)
+│  │  └─ ipc/                # handle.ts, errors.ts e um handler por domínio
 │  ├─ preload/
 │  │  ├─ index.ts            # contextBridge -> window.api
 │  │  └─ global.d.ts         # tipo de window.api
@@ -153,8 +117,8 @@ habit-tracker/
 │     └─ src/
 │        ├─ main.ts, App.vue, api.ts, icons.ts
 │        ├─ router/          # rotas em hash mode (/test só em dev)
-│        ├─ stores/          # groups e habits (today e settings são placeholders)
-│        ├─ composables/     # useTree e useToast (useDate, useHotkeys, useStreaks: placeholders)
+│        ├─ stores/          # groups e habits
+│        ├─ composables/     # useTree e useToast
 │        ├─ components/      # 18 componentes + actions.ts, groupColors.ts, index.ts
 │        ├─ views/           # Today, Week, Month, Stats, Settings (placeholders) e TestView
 │        ├─ types/           # tree.ts
@@ -180,32 +144,23 @@ interface Api {
     create(g: NewGroup): Promise<Group>
     update(id: number, g: Partial<Group>): Promise<Group>
     remove(id: number): Promise<void>
-    reorder(ids: number[]): Promise<void>
   }
   habits: {
     list(): Promise<Habit[]>
     create(h: NewHabit): Promise<Habit>
     update(id: number, h: Partial<Habit>): Promise<Habit>
     remove(id: number): Promise<void>
-    reorder(groupId: number | null, ids: number[]): Promise<void>
   }
   completions: {
     range(from: string, to: string): Promise<Completion[]>
     set(habitId: number, date: string, value: number, note?: string): Promise<Completion>
     clear(habitId: number, date: string): Promise<void>
   }
-  stats: {
-    habit(id: number): Promise<HabitStats>
-    overview(from: string, to: string): Promise<Overview>
-  }
   settings: { get(): Promise<Settings>; set(s: Partial<Settings>): Promise<Settings> }
-  data: {
-    exportJson(): Promise<string>
-    importJson(path: string): Promise<void>
-    backupNow(): Promise<string>
-  }
 }
 ```
+
+O contrato cresce com as fases: `stats` entra na Fase 6 e `data` (exportar, importar e backup) na Fase 7.
 
 ### 4.4 Decisões de arquitetura
 
@@ -281,13 +236,13 @@ Cores extras já definidas no `tokens.css`: Azul `#3F5F73` sobre `#D9E4EA`, Lil�
 - **Linha de hábito:** ícone + nome; item selecionado vira cartão com borda e sombra suave.
 - **Checkbox de hábito:** círculo vazio que preenche com a cor do grupo e um check animado.
 - **Divisor decorativo:** `*.☆.☽.☆.☽.☆.*` ao final da lista.
-- **Barra de ações inferior:** ícones de traço (novo hábito, novo grupo, ordenar, mostrar/ocultar sidebar, recolher tudo) com pílula de fundo no item ativo.
+- **Barra de ações inferior:** ícones de traço (novo hábito, que vira editar hábito quando um hábito está selecionado, novo grupo e recolher tudo) com pílula de fundo no item ativo.
 - **Modal/Drawer, Toast, Tooltip, Campo de texto, Seletor de cor e ícone, Empty state** no mesmo estilo.
 - **Heatmap:** quadrados com raio pequeno, escala de 5 tons derivada da cor do grupo sobre `--surface`.
 
 ### 5.6 Layout da janela
 
-- Sidebar de \~300 px com árvore de grupos e hábitos, no estilo do print, e toggle para mostrar/ocultar (botão e atalho Ctrl/Cmd+B); recolhida, a área principal ocupa a largura toda.
+- Sidebar fixa de \~300 px com árvore de grupos e hábitos, no estilo do print.
 - Área principal com a visão selecionada (Hoje, Semana, Mês, Estatísticas).
 - Largura mínima da janela: 880×600 px.
 - Tema escuro quente (marrom café) previsto como evolução; os tokens já nascem como variáveis CSS para isso.
@@ -467,7 +422,7 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 1 — Design system e shell do app
 
-**Status:** concluída. Há 18 componentes em `components/`, catálogo na rota `/test` (só em dev) e as 7 cores de grupo em `tokens.css`. O toggle da sidebar entra na Fase 3.
+**Status:** concluída. Há 18 componentes em `components/`, catálogo na rota `/test` (só em dev) e as 7 cores de grupo em `tokens.css`.
 
 **Objetivo:** implementar o visual do print como biblioteca de componentes e montar o layout principal com dados fictícios.
 
@@ -491,7 +446,7 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 2 — Camada de dados e IPC
 
-**Status:** concluída (migração `001_init.sql`, repositórios, schemas Zod, handlers com `IpcResult`, preload tipado, seed e testes). Resta remover o código legado de arquivar, descrito em "Estado atual do repositório".
+**Status:** concluída (migração `001_init.sql`, repositórios, schemas Zod, handlers com `IpcResult`, preload tipado, seed e testes).
 
 **Objetivo:** persistência confiável em SQLite com contrato IPC tipado e validado.
 
@@ -518,9 +473,9 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 3 — Grupos e hábitos (CRUD)
 
-**Status:** em andamento. Feito: tarefas 1 a 5 e 12 (stores, sidebar com dados reais, modais de grupo e hábito, validação com Zod e contagem no cabeçalho), mais a edição de hábito pela barra de ações, o toggle da sidebar (com `Ctrl/Cmd+B`) e o tratamento do menu de contexto na sidebar. Faltam reordenar, mover entre grupos, excluir, o estado vazio e a edição de grupo pelo menu de contexto.
+**Status:** concluída, exceto os testes dos stores, que ainda não foram escritos.
 
-**Objetivo:** criar, editar e organizar grupos e hábitos pela interface.
+**Objetivo:** criar, editar e excluir grupos e hábitos pela interface, sem recursos extras.
 
 **Tarefas**
 
@@ -529,23 +484,21 @@ Total aproximado: 6–8 semanas.
 3. Modal "Novo/Editar grupo": nome, cor, ícone, com pré-visualização da linha.
 4. Modal "Novo/Editar hábito": nome, descrição, grupo, ícone, tipo (feito/contador), meta e unidade, frequência (todo dia, dias da semana, X vezes por semana), data de início, lembrete.
 5. Validação de formulário com Zod, mensagens em português e foco no primeiro erro.
-6. Reordenar grupos e hábitos por arrastar e soltar (HTML5 nativo, ou `vuedraggable` se o nativo ficar complexo) e persistir `position`.
-7. Mover hábito entre grupos.
-8. Toggle da sidebar (mostrar/ocultar): estado `sidebarOpen` num store `ui`, guardado em `localStorage` dentro de `try/catch`. A ação `toggle-view` da `ActionBar`, que hoje emite o evento sem handler, vira "Mostrar/ocultar sidebar" com o ícone `panel-left` (novo em `icons.ts`). Quando a sidebar está recolhida, um botão fixo na área de conteúdo a reabre. Atalho `Ctrl/Cmd+B` em `useHotkeys`. No `.shell` a coluna da grid anima entre `var(--sidebar-width)` e `0`; a sidebar recolhida recebe `inert` e `aria-hidden`, e a animação respeita `prefers-reduced-motion`.
-9. Excluir grupo e hábito com confirmação explicando o efeito (grupo: hábitos ficam sem grupo; hábito: apaga histórico).
-10. Menu de contexto (botão direito) na sidebar: editar, excluir, duplicar.
-11. Estado vazio acolhedor quando não há grupos ou hábitos, com ação para criar o primeiro.
-12. Contagem no cabeçalho ("N hábitos, M grupos") atualizada em tempo real.
+6. Mover hábito entre grupos pelo campo "Grupo" do formulário de edição.
+7. Excluir grupo e hábito com confirmação explicando o efeito, pelo botão "Excluir" do formulário de edição (grupo: hábitos ficam sem grupo; hábito: apaga histórico).
+8. Botão direito num grupo ou hábito abre o formulário de edição.
+9. Estado vazio acolhedor quando não há grupos ou hábitos, com ação para criar o primeiro.
+10. Contagem no cabeçalho ("N hábitos, M grupos") atualizada em tempo real.
 
-**Entregáveis:** gestão completa de grupos e hábitos persistida, com sidebar que pode ser ocultada.
+**Entregáveis:** gestão completa de grupos e hábitos persistida.
 
-**Critérios de aceite:** criar → editar → reordenar → excluir funciona sem recarregar; ordem persiste após reiniciar; testes dos stores passando; o toggle oculta e mostra a sidebar com animação e lembra a escolha ao reabrir o app.
+**Critérios de aceite:** criar → editar → excluir funciona sem recarregar; os itens aparecem na ordem de criação; testes dos stores passando.
 
-**Riscos:** drag and drop com árvore aninhada → limitar a dois níveis (grupo → hábito).
+**Riscos:** a ordem é sempre a de criação até a feature de arrastar e soltar entrar (ver "Futuras features").
 
 ### Fase 4 — Check-in diário (tela Hoje)
 
-**Status:** não iniciada. Existem só placeholders: `TodayView.vue`, `stores/today.ts`, `useDate.ts` e `useHotkeys.ts`. O `shared/date.ts` já tem `toDateKey` e `addDays`.
+**Status:** não iniciada. Só existe o placeholder `TodayView.vue`; `stores/today.ts` e `useDate.ts` nascem nesta fase. O `shared/date.ts` já tem `toDateKey` e `addDays`.
 
 **Objetivo:** o fluxo principal: ver o que é devido hoje e marcar em um clique.
 
@@ -595,7 +548,7 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 6 — Estatísticas e streaks
 
-**Status:** não iniciada. `StatsView.vue`, `services/stats.ts`, `ipc/stats.ts` e `useStreaks.ts` são placeholders. Os tipos `HabitStats` e `Overview` e o contrato `window.api.stats` já estão declarados, mas o main ainda não registra os handlers.
+**Status:** não iniciada. Só existe o placeholder `StatsView.vue`. O serviço e o handler de estatísticas, o `useStreaks.ts`, os tipos `HabitStats` e `Overview` e o `window.api.stats` nascem nesta fase.
 
 **Objetivo:** transformar o histórico em informação motivadora e simples.
 
@@ -619,7 +572,7 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 7 — Configurações, backup e dados
 
-**Status:** não iniciada. `SettingsView.vue`, `stores/settings.ts`, `ipc/data.ts` e `services/backup.ts` são placeholders. O repositório e o IPC de `settings` já funcionam, com `DEFAULT_SETTINGS` em `shared/defaults.ts` (a semana começa no domingo).
+**Status:** não iniciada. Só existe o placeholder `SettingsView.vue`; `stores/settings.ts`, `ipc/data.ts` e `services/backup.ts` nascem nesta fase. O repositório e o IPC de `settings` já funcionam, com `DEFAULT_SETTINGS` em `shared/defaults.ts` (a semana começa no domingo).
 
 **Objetivo:** dar controle e segurança sobre os dados.
 
@@ -643,7 +596,7 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 8 — Integração com o desktop
 
-**Status:** não iniciada (`services/tray.ts` e `services/notifications.ts` são placeholders).
+**Status:** não iniciada (os serviços de bandeja e de notificações nascem nesta fase).
 
 **Objetivo:** fazer o app se comportar como um app desktop de verdade.
 
@@ -715,24 +668,27 @@ Total aproximado: 6–8 semanas.
 
 **Riscos:** tamanho do instalador (\~100 MB) e avisos de assinatura → aceitável para uso pessoal; Tauri fica como opção futura se o peso incomodar.
 
-## 8. Roadmap pós-MVP
+## 8. Futuras features (pós-MVP)
 
-1. Tema escuro quente.
-2. Sincronização por arquivo em pasta na nuvem.
-3. Tags, filtros e busca.
-4. Múltiplos lembretes por hábito e hábitos com horário.
-5. Relatório semanal/mensal exportável.
-6. Avaliar migração para Tauri.
+1. Duplicar hábito.
+2. Reordenar grupos e hábitos por arrastar e soltar (a coluna `position` já existe no banco).
+3. Tema escuro quente.
+4. Sincronização por arquivo em pasta na nuvem.
+5. Tags, filtros e busca.
+6. Múltiplos lembretes por hábito e hábitos com horário.
+7. Atalho global de check-in rápido.
+8. Relatório semanal/mensal exportável.
+9. Avaliar migração para Tauri.
 
 ## 9. Riscos gerais
 
-| Risco                                            | Impacto | Mitigação                                       |
-| ------------------------------------------------ | ------- | ----------------------------------------------- |
-| Módulo nativo SQLite quebrando entre plataformas | Alto    | Matrix no CI desde a Fase 2                     |
-| Bugs de data/fuso/virada do dia                  | Alto    | Datas como string local, testes com vários `TZ` |
-| Escopo crescendo                                 | Médio   | Fases curtas, itens extras só no roadmap        |
-| Perda de dados                                   | Alto    | WAL, transações, backup diário, import validado |
-| Tamanho do app                                   | Baixo   | Aceitar; Tauri como alternativa futura          |
+| Risco                                            | Impacto | Mitigação                                         |
+| ------------------------------------------------ | ------- | ------------------------------------------------- |
+| Módulo nativo SQLite quebrando entre plataformas | Alto    | Matrix no CI desde a Fase 2                       |
+| Bugs de data/fuso/virada do dia                  | Alto    | Datas como string local, testes com vários `TZ`   |
+| Escopo crescendo                                 | Médio   | Fases curtas, itens extras só em futuras features |
+| Perda de dados                                   | Alto    | WAL, transações, backup diário, import validado   |
+| Tamanho do app                                   | Baixo   | Aceitar; Tauri como alternativa futura            |
 
 ## 10. Definição de pronto (MVP)
 
