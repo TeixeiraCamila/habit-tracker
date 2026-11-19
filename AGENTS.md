@@ -12,8 +12,8 @@ usuária; não há conta, servidor ou nuvem.
 
 Stack prevista pelo planejamento: Vue 3 (Composition API, `<script setup>`), Pinia, Vue Router
 (hash mode), SQLite via better-sqlite3, Zod, date-fns, lucide-vue-next, Vitest e Playwright.
-As Fases 0 e 2 estão concluídas com design system, shell do app e persistência/IPC; a Fase 3 está em
-andamento.
+As Fases 0 a 3 estão concluídas (design system, shell do app, persistência/IPC e CRUD de grupos e
+hábitos); a Fase 4 está em andamento.
 
 ## Comandos
 
@@ -62,10 +62,10 @@ recursos do empacotamento; `resources/` contém recursos usados em runtime.
 
 ### Estado atual
 
-As Fases 0 e 2 estão concluídas (design system, shell do app e camada de dados/IPC) e a Fase 3 está
-em andamento (stores, sidebar com dados reais, modais de grupo e hábito com validação, edição de
-hábito pela barra de ações). Os demais arquivos da estrutura continuam como placeholders e devem
-ser preenchidos conforme as fases do planejamento, sem criar uma organização paralela.
+As Fases 0 a 3 estão concluídas (design system, shell do app, camada de dados/IPC e CRUD de grupos
+e hábitos com testes); a Fase 4 (check-in diário) está em andamento. Os demais arquivos da estrutura
+continuam como placeholders e devem ser preenchidos conforme as fases do planejamento, sem criar
+uma organização paralela.
 
 ## Arquitetura e regras
 

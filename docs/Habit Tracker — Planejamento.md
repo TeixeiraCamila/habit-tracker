@@ -473,7 +473,7 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 3 — Grupos e hábitos (CRUD)
 
-**Status:** concluída, exceto os testes dos stores, que ainda não foram escritos.
+**Status:** concluída. Stores, sidebar com dados reais, modais com validação, exclusão, menu de contexto e testes dos stores prontos.
 
 **Objetivo:** criar, editar e excluir grupos e hábitos pela interface, sem recursos extras.
 
