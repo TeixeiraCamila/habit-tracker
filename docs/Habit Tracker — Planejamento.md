@@ -23,7 +23,6 @@ Um aplicativo desktop, local-first e offline, para registrar hábitos diários, 
 - Visão semanal e mensal (calendário de hábitos).
 - Streak atual, maior streak e taxa de conclusão.
 - Heatmap anual por hábito.
-- Notas opcionais por check-in.
 - Exportar/importar dados (JSON) e backup do banco.
 - Notificações de lembrete e ícone na bandeja.
 - Instalador para Windows, macOS e Linux.
@@ -498,7 +497,7 @@ Total aproximado: 6–8 semanas.
 
 ### Fase 4 — Check-in diário (tela Hoje)
 
-**Status:** não iniciada. Só existe o placeholder `TodayView.vue`; `stores/today.ts` e `useDate.ts` nascem nesta fase. O `shared/date.ts` já tem `toDateKey` e `addDays`.
+**Status:** concluída. `useDate`, `isDue`, stores de configurações e do dia, tela Hoje com check-in otimista, navegação entre dias e atalhos de teclado. O streak da Fase 6 já tem espaço reservado na linha.
 
 **Objetivo:** o fluxo principal: ver o que é devido hoje e marcar em um clique.
 
@@ -509,12 +508,11 @@ Total aproximado: 6–8 semanas.
 3. `TodayView`: lista de hábitos devidos agrupados por grupo, com cor do grupo e barra de progresso do dia ("5 de 8").
 4. Checkbox animado para hábitos booleanos; clique alterna feito/não feito.
 5. Controle de contador (− / valor / +) para hábitos de contador, com preenchimento parcial visual.
-6. Nota opcional por check-in (popover), exibida como ícone na linha.
-7. Navegação entre dias (anterior/próximo/hoje) para registrar dias passados; bloquear dias futuros.
-8. Atualização otimista da UI com rollback em caso de erro no IPC.
-9. Atalhos de teclado: setas para navegar, `Espaço` para marcar, `N` novo hábito, `T` ir para hoje.
-10. Mensagem leve ao concluir tudo do dia (texto simples, sem confete).
-11. Reservar o espaço da sequência atual ao lado do hábito (preenchido na Fase 6).
+6. Navegação entre dias (anterior/próximo/hoje) para registrar dias passados; bloquear dias futuros.
+7. Atualização otimista da UI com rollback em caso de erro no IPC.
+8. Atalhos de teclado: setas para navegar, `Espaço` para marcar, `N` novo hábito, `T` ir para hoje.
+9. Mensagem leve ao concluir tudo do dia (texto simples, sem confete).
+10. Reservar o espaço da sequência atual ao lado do hábito (preenchido na Fase 6).
 
 **Entregáveis:** tela Hoje funcional, check-in persistido.
 
@@ -533,7 +531,7 @@ Total aproximado: 6–8 semanas.
 1. `WeekView`: grade hábitos × dias da semana, células clicáveis para marcar/desmarcar, dias não devidos em tom neutro.
 2. `MonthView`: calendário mensal com indicador de conclusão por dia (círculo preenchido proporcional ao % concluído).
 3. Seleção de um hábito na sidebar filtra a visão para aquele hábito (mês com marcação dia a dia).
-4. Clique em um dia do mês abre o detalhe daquele dia (lista de hábitos e notas).
+4. Clique em um dia do mês abre o detalhe daquele dia (lista de hábitos).
 5. Navegação anterior/próximo/hoje e seletor de mês e ano.
 6. Carregar dados por intervalo (`completions.range`) com cache no store e invalidação ao marcar.
 7. Respeitar `weekStartsOn` (domingo ou segunda).

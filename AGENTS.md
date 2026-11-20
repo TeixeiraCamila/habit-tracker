@@ -63,7 +63,7 @@ recursos do empacotamento; `resources/` contém recursos usados em runtime.
 ### Estado atual
 
 As Fases 0 a 3 estão concluídas (design system, shell do app, camada de dados/IPC e CRUD de grupos
-e hábitos com testes); a Fase 4 (check-in diário) está em andamento. Os demais arquivos da estrutura
+e hábitos com testes); a Fase 4 (check-in diário) está concluída. Os demais arquivos da estrutura
 continuam como placeholders e devem ser preenchidos conforme as fases do planejamento, sem criar
 uma organização paralela.
 
