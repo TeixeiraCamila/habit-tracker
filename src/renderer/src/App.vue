@@ -9,6 +9,9 @@ import ActionBar from '@renderer/components/ActionBar.vue'
 import Toast from '@renderer/components/Toast.vue'
 import { useGroupsStore } from '@renderer/stores/groups'
 import { useHabitsStore } from '@renderer/stores/habits'
+import { useSettingsStore } from '@renderer/stores/settings'
+import { useTodayStore } from '@renderer/stores/today'
+import { useHotkeys } from '@renderer/composables/useHotkeys'
 import { useTree } from '@renderer/composables/useTree'
 import { useToast } from '@renderer/composables/useToast'
 import { errorMessage } from '@renderer/utils/errors'
@@ -24,6 +27,8 @@ const route = useRoute()
 const router = useRouter()
 const groupsStore = useGroupsStore()
 const habitsStore = useHabitsStore()
+const settingsStore = useSettingsStore()
+const todayStore = useTodayStore()
 const { treeGroups, ungrouped } = useTree()
 const { toast, error, dismiss } = useToast()
 const loaded = ref(false)
@@ -66,6 +71,20 @@ async function run(task: () => Promise<unknown>): Promise<void> {
     error(errorMessage(e))
   }
 }
+
+useHotkeys({
+  newHabit: () => openHabitForm(),
+  today: () => {
+    void router.push({ name: 'today' })
+    if (route.name === 'today') todayStore.goToToday()
+  },
+  previousDay: () => todayStore.previousDay(),
+  nextDay: () => todayStore.nextDay(),
+  toggleFirst: () => {
+    const first = todayStore.due[0]
+    if (first) void run(() => todayStore.toggle(first.habit))
+  }
+})
 
 const menu = reactive<{ open: boolean; x: number; y: number; kind: 'group' | 'habit'; id: number }>(
   { open: false, x: 0, y: 0, kind: 'habit', id: 0 }
@@ -142,16 +161,12 @@ const view = computed({
   set: (name: string) => router.push({ name })
 })
 
-function handleSort(): void {
-  // Reordenação por arrastar e soltar entra na Fase 3; a ação já tem handler no shell.
-}
-
 onMounted(async () => {
   // rede de seguranca: qualquer chamada sem tratamento vira toast
   window.addEventListener('unhandledrejection', (e) => error(errorMessage(e.reason)))
 
   try {
-    await Promise.all([groupsStore.load(), habitsStore.load()])
+    await Promise.all([groupsStore.load(), habitsStore.load(), settingsStore.load()])
   } catch (e) {
     error(errorMessage(e))
   } finally {
@@ -196,13 +211,12 @@ onMounted(async () => {
         @new-habit="openHabitForm()"
         @new-group="openGroupForm()"
         @edit-habit="openHabitForm"
-        @sort="handleSort"
         @collapse-all="tree?.collapseAll()"
       />
     </aside>
 
     <main class="content">
-      <RouterView />
+      <RouterView v-if="loaded" />
     </main>
 
     <Toast

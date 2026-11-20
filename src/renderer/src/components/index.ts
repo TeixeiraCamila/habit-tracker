@@ -2,6 +2,7 @@
 export { default as ActionBar } from './ActionBar.vue'
 export { default as AppHeader } from './AppHeader.vue'
 export { default as AppIcon } from './AppIcon.vue'
+export { default as CheckInRow } from './CheckInRow.vue'
 export { default as ColorPicker } from './ColorPicker.vue'
 export { default as EmptyState } from './EmptyState.vue'
 export { default as GroupRow } from './GroupRow.vue'

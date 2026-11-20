@@ -15,7 +15,6 @@ const props = withDefaults(
 const emit = defineEmits<{
   'new-habit': []
   'new-group': []
-  sort: []
   'collapse-all': []
   'edit-habit': [habit: Habit]
 }>()
@@ -38,9 +37,6 @@ function run(action: ActionItem): void {
       break
     case 'new-group':
       emit('new-group')
-      break
-    case 'sort':
-      emit('sort')
       break
     case 'collapse-all':
       emit('collapse-all')
